@@ -37,7 +37,9 @@ async function callAINonStreaming(
     }
 
     const data = await response.json()
-    return data?.choices?.[0]?.message?.content || ''
+    const content = data?.choices?.[0]?.message?.content || ''
+    // Strip markdown code fences (AI may wrap HTML in ```html ... ```)
+    return content.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '')
   } catch (error) {
     console.error('[Briefing] AI API call failed:', error)
     return ''
@@ -70,7 +72,7 @@ ${newsText}
 3. 新闻部分：${newsTopics ? `优先介绍与"${newsTopics}"相关的新闻` : '按类别精选最重要的新闻'}
 4. 每篇新闻附一句话摘要
 5. 整体风格温馨专业，适合晨间阅读
-6. 只输出 HTML 内容，不含 <!DOCTYPE>, <html>, <head>, <body> 标签`
+6. 直接输出 HTML，不要用 \`\`\`html 或任何 markdown 代码块包裹`
 
   return prompt
 }
