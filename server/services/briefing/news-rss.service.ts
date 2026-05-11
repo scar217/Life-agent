@@ -101,7 +101,7 @@ export function formatNewsHTML(newsItems: NewsItem[]): string {
       <div style="padding:24px 0;border-bottom:${isLast ? 'none' : '1px dashed #e5e7eb'}">
         <div style="display:flex;align-items:center;margin-bottom:12px;gap:12px">
           <span style="background-color:#94a3b8;color:#fff;font-size:13px;padding:4px 14px;border-radius:20px;white-space:nowrap">${escapeHtml(item.source)}</span>
-          <a href="${safeLink}" aria-label="${escapeHtml(ariaLabel)}" style="font-size:18px;color:#1f2937;font-weight:500;text-decoration:none">${escapeHtml(item.title)}</a>
+          <a href="${safeLink}" aria-label="${escapeHtml(ariaLabel)}" class="news-link" style="font-size:18px;color:#1f2937;font-weight:500;text-decoration:none">${escapeHtml(item.title)}</a>
         </div>
         ${item.description ? `<p style="font-size:15px;color:#6b7280;line-height:1.7;margin:0">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
       </div>`

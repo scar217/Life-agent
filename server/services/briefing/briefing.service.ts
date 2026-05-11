@@ -114,13 +114,18 @@ export async function generateAndSendBriefing(
   const emptyNewsHTML = '<p style="color:#999;font-size:14px;text-align:center;padding:30px 0">暂无新闻，请稍后查看</p>'
 
   const fullHTML = `<div lang="zh-CN" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff">
+    <style>
+      .news-link:hover { color: #3b82f6 !important; text-decoration: underline !important; }
+    </style>
     <header><h1 style="color:#333;border-bottom:3px solid #667eea;padding-bottom:10px">&#x1F4F0; 每日简报</h1></header>
     <p style="color:#444;font-size:14px">${dateStr}</p>
     <main>
       ${greeting ? `<p style="font-size:16px;line-height:1.8;color:#444;margin:15px 0">${escapeHtml(greeting)}</p>` : ''}
       ${weatherHTML}
-      <div style="display:flex;align-items:center;border-bottom:1px solid #f0f2f5;padding-bottom:15px;margin:25px 0 15px"><div style="width:6px;height:24px;background-color:#3b82f6;border-radius:4px;margin-right:12px"></div><h2 style="font-size:24px;font-weight:bold;color:#3b82f6;margin:0;letter-spacing:1px">精选新闻</h2></div>
-      ${newsHTML || emptyNewsHTML}
+      <div style="box-shadow:0 2px 16px rgba(0,0,0,0.08);border-radius:12px;padding:20px 30px;margin:20px 0;background:#fff">
+        <div style="display:flex;align-items:center;border-bottom:1px solid #f0f2f5;padding-bottom:15px;margin-bottom:10px"><div style="width:6px;height:24px;background-color:#3b82f6;border-radius:4px;margin-right:12px"></div><h2 style="font-size:24px;font-weight:bold;color:#3b82f6;margin:0;letter-spacing:1px">精选新闻</h2></div>
+        ${newsHTML || emptyNewsHTML}
+      </div>
     </main>
     <footer>
       <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
