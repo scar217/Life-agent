@@ -151,14 +151,15 @@ export async function generateAndSendBriefing(
     : ''
 
   const fullHTML = `
-<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff">
-  <h1 style="color:#333;border-bottom:3px solid #667eea;padding-bottom:10px">&#x1F4F0; 每日简报</h1>
-  <p style="color:#666;font-size:14px">${dateStr}</p>
-  ${weatherHTML}
-  <div style="margin:20px 0">${contentHTML}</div>
-  <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
-  <p style="color:#999;font-size:12px;text-align:center">本简报由 AI Life Agent 自动生成</p>
-</div>`
+                    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff">
+                      <h1 style="color:#333;border-bottom:3px solid #667eea;padding-bottom:10px">&#x1F4F0; 每日简报</h1>
+                      <p style="color:#666;font-size:14px">${dateStr}</p>
+                      ${weatherHTML}
+                      <div style="margin:20px 0">${contentHTML}</div>
+                      <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
+                      <p style="color:#999;font-size:12px;text-align:center">本简报由 AI Life Agent 自动生成</p>
+                    </div>
+                    `
 
   // 7. Send
   const subject = `每日简报 — ${dateStr}`
