@@ -46,8 +46,8 @@ interface EMQuoteData {
   f50?: number  // 量比
   f51?: number  // 涨停价
   f52?: number  // 跌停价
-  f57?: string  // 名称
-  f58?: string  // 代码
+  f57?: string  // 代码
+  f58?: string  // 名称
   f116?: number // 总市值
   f117?: number // 市盈率
   f162?: number // 市盈率（动）
@@ -107,7 +107,7 @@ export async function fetchStockQuotes(rawSymbols: string[]): Promise<StockQuote
     const p = parsed[i]
     return {
       symbol: p?.symbol || '',
-      name: item.f57 || '',
+      name: item.f58 || '',
       market: p?.market || '',
       price: formatNumber(item.f43),
       change: formatNumber(item.f170 ?? item.f49),
