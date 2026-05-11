@@ -24,11 +24,13 @@ export default function OAuthPopupPage() {
   }, [])
 
   // 只触发一次
-  if (!triggered.current && typeof window !== 'undefined') {
-    triggered.current = true
-    // 告诉Auth服务，登录成功后，跳转到 /auth/popup/success 页面
-    signIn(provider, { callbackUrl: '/auth/popup/success' })
-  }
+  useEffect(() => {
+    if (!triggered.current && typeof window !== 'undefined') {
+      triggered.current = true
+      // 告诉Auth服务，登录成功后，跳转到 /auth/popup/success 页面
+      signIn(provider, { callbackUrl: '/auth/popup/success' })
+    }
+  }, [provider])
 
   // 过渡页面，显示加载中，正在跳转到 {provider} 登录...
   return (

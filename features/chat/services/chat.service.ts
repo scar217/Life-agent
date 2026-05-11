@@ -351,6 +351,8 @@ export const ChatService = {
               args: {
                 query: data.query,
                 prompt: data.prompt,
+                action: data.action,
+                symbols: data.symbols,
               },
             }
             s.updateMessage(messageId, {
@@ -398,6 +400,10 @@ export const ChatService = {
                     sources: data.sources,
                     width: data.width,
                     height: data.height,
+                    action: data.action,
+                    items: data.items,
+                    sectors: data.sectors,
+                    gainers: data.gainers,
                   },
                 }
               }

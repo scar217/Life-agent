@@ -34,9 +34,10 @@ model User {
   accounts      Account[]
   /// 用户会话（NextAuth）
   sessions      Session[]
+  /// 用户自选股关注列表
+  watchlist     StockWatchlist[]
   /// 每日简报配置（一对一）
   briefingConfig BriefingConfig?
-
   @@index([email])
 }
 
@@ -239,4 +240,25 @@ model BriefingConfig {
   /// 每个用户仅一条配置
   @@unique([userId])
   @@index([pushHour, isEnabled])
+}
+
+/// 自选股关注表（用户→股票代码映射）
+model StockWatchlist {
+  /// 主键
+  id        String   @id @default(cuid())
+  /// 所属用户 ID
+  userId    String
+  /// 所属用户（级联删除）
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 股票代码（东方财富格式：sh600519 / sz000858 / hk00700）
+  symbol    String
+  /// 股票名称（冗余存储）
+  name      String
+  /// 所属市场（SH / SZ / HK）
+  market    String
+  /// 添加时间
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, symbol])
+  @@index([userId])
 }

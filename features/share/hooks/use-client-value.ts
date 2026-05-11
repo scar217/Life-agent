@@ -13,8 +13,8 @@ export function useClientValue<T>(factory: () => T, fallback: T): T {
   const [value, setValue] = useState<T>(fallback)
   
   useEffect(() => {
-    setValue(factory())
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    setValue(factory()) // eslint-disable-line react-hooks/set-state-in-effect
+  }, [])
   
   return value
 }
@@ -26,7 +26,7 @@ export function useIsMounted(): boolean {
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
-    setMounted(true)
+    setMounted(true) // eslint-disable-line react-hooks/set-state-in-effect
   }, [])
   
   return mounted

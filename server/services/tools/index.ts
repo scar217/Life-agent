@@ -7,6 +7,7 @@ import { createWebSearchTool } from './web-search'
 import { createImageGenerationTool } from './image-generation'
 import { isSiliconFlowS3Available } from '@/server/services/image/network-probe'
 import { createWeatherTool } from './get-weather'
+import { createStockTool } from './stock-quote'
 
 // 创建全局工具注册表
 const toolRegistry = new ToolRegistry()
@@ -44,6 +45,9 @@ async function initTools(): Promise<void> {
   } else {
     console.warn('[Tools] SILICONFLOW_API_KEY not configured, generate_image disabled')
   }
+
+  // 注册股票查询工具（使用东方财富公开 API，无需 key）
+  toolRegistry.register(createStockTool())
 }
 
 /**
@@ -74,3 +78,4 @@ export type {
 export { createWebSearchTool } from './web-search'
 export { createImageGenerationTool } from './image-generation'
 export { ToolRegistry } from './registry'
+export { createStockTool } from './stock-quote'
