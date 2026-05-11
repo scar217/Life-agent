@@ -33,8 +33,10 @@ const RSS_FEEDS = [
   { name: '爱范儿', url: 'https://www.ifanr.com/feed' },
   { name: 'InfoQ 中文', url: 'https://www.infoq.cn/feed' },
   { name: '知乎每日精选', url: 'https://www.zhihu.com/rss' },
+  { name: 'SegmentFault', url: 'https://segmentfault.com/feeds' },
   { name: '掘金', url: 'https://juejin.cn/rss' },
   { name: 'V2EX', url: 'https://www.v2ex.com/index.xml' },
+  { name: '雪球', url: 'https://xueqiu.com/hots/topic/rss' },
   { name: '博客园', url: 'https://www.cnblogs.com/rss' },
   { name: '阮一峰的网络日志', url: 'https://www.ruanyifeng.com/blog/atom.xml' },
 ]
