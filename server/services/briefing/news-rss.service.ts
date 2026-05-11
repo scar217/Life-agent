@@ -28,13 +28,13 @@ export interface NewsItem {
 
 const RSS_FEEDS = [
   { name: 'TechCrunch', url: 'https://techcrunch.com/feed/' },
-  { name: 'The Decision Lab', url: 'https://www.thedecisionlab.com/feed/' },
-  { name: 'Hacker News', url: 'https://hnrss.org/frontpage' },
+  { name: '36氪', url: 'https://36kr.com/feed' },
+  { name: '少数派', url: 'https://sspai.com/feed' },
   { name: 'The Verge', url: 'https://www.theverge.com/rss/full.xml' },
-  { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss/' },
-  { name: 'DeepMind', url: 'https://deepmind.com/blog/feed/basic/' },
+  { name: '虎嗅', url: 'https://www.huxiu.com/rss/0.xml' },
+  { name: '机器之心', url: 'https://www.jiqizhixin.com/rss' },
   { name: 'Stripe Blog', url: 'https://stripe.com/blog/feed.rss' },
-  { name: 'First Round Review', url: 'https://firstround.com/review/feed.xml' },
+  { name: 'InfoQ 中文', url: 'https://www.infoq.cn/feed' },
   { name: 'The Pragmatic Engineer', url: 'https://blog.pragmaticengineer.com/rss/' },
   { name: 'MIT News - AI', url: 'https://news.mit.edu/rss/topic/artificial-intelligence2' },
 ]
