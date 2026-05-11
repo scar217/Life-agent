@@ -60,6 +60,10 @@ export class SSEWriter {
     if (tc.function.name === 'web_search') event.query = args.query
     if (tc.function.name === 'get_weather') event.city = args.city
     if (tc.function.name === 'generate_image') event.prompt = args.prompt
+    if (tc.function.name === 'get_stock_info') {
+      event.action = args.action
+      event.symbols = args.symbols
+    }
 
     this._send(event)
   }
@@ -88,6 +92,13 @@ export class SSEWriter {
       event.imageUrl = parsed.url
       event.width = parsed.width
       event.height = parsed.height
+    }
+    if (result.name === 'get_stock_info') {
+      event.action = parsed.action
+      event.items = parsed.items
+      event.sectors = parsed.sectors
+      event.gainers = parsed.gainers
+      event.resultCount = parsed.items?.length || parsed.sectors?.length || parsed.gainers?.length || 0
     }
 
     this._send(event)
