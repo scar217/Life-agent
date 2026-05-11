@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import { Info, UserCircle2, LogOut, Palette } from 'lucide-react'
+import { Info, UserCircle2, LogOut, Palette, Newspaper } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ModelSelector } from '@/features/chat/components/ModelSelector'
 import { useChatStore } from '@/features/chat/store/chat.store'
@@ -37,6 +38,7 @@ export function Header() {
   const reset = useChatStore((s) => s.reset)
   const { data: session } = useSession()
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
   const [aboutDialogOpen, setAboutDialogOpen] = useState(false)
 
   const handleLogout = async () => {
@@ -136,8 +138,14 @@ export function Header() {
               </span>
             </DropdownMenuItem>
             
+            {/* 简报设置 */}
+            <DropdownMenuItem onClick={() => router.push('/settings/briefing')} className="cursor-pointer">
+              <Newspaper className="mr-2 h-4 w-4" />
+              <span>简报设置</span>
+            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
-            
+
             {/* 退出登录 */}
             <DropdownMenuItem 
               onClick={handleLogout}
