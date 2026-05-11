@@ -446,7 +446,7 @@ export function ChatMessageUI({
           {message.thinking && (
             <ThinkingPanel
               messageId={messageId}
-              defaultExpanded={true}
+              defaultExpanded={false}
             />
           )}
 

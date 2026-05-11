@@ -50,6 +50,13 @@ export function ThinkingPanel({
     }
   }, [content, isStreaming, isExpanded])
   
+  // 思考开始时自动展开面板
+  useEffect(() => {
+    if (isStreaming) {
+      setIsExpanded(true)
+    }
+  }, [isStreaming])
+
   // 思考完成后自动折叠面板
   const prevStreamingRef = useRef(isStreaming)
   useEffect(() => {
