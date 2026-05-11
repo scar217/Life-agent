@@ -76,7 +76,7 @@ export function buildQuoteUrl(symbols: ParsedSymbol[]): string {
  * 构建东方财富列表 API URL (板块/涨幅榜)
  */
 export function buildListUrl(fs: string, pageSize: number): string {
-  return `https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=${pageSize}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=f2,f3,f4,f8,f12,f14,f15,f16,f17,f18,f20`
+  return `https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=${pageSize}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=f2,f3,f4,f8,f12,f14,f100,f128`
 }
 
 export { EASTMONEY_MARKET_MAP, MARKET_NAME_MAP }

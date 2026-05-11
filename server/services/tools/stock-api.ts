@@ -23,6 +23,13 @@ async function eastmoneyFetch<T>(url: string): Promise<T> {
     }
 
     return await response.json()
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[StockAPI] Request timeout')
+      throw new Error('股票数据请求超时，请稍后重试')
+    }
+    console.error('[StockAPI] Request failed:', error instanceof Error ? error.message : error)
+    throw error
   } finally {
     clearTimeout(timeoutId)
   }
