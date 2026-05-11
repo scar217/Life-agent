@@ -50,6 +50,15 @@ export function ThinkingPanel({
     }
   }, [content, isStreaming, isExpanded])
   
+  // 思考完成后自动折叠面板
+  const prevStreamingRef = useRef(isStreaming)
+  useEffect(() => {
+    if (prevStreamingRef.current && !isStreaming) {
+      setIsExpanded(false)
+    }
+    prevStreamingRef.current = isStreaming
+  }, [isStreaming])
+
   // 如果没有内容，不渲染
   if (!content) return null
   
