@@ -1,5 +1,21 @@
 import Parser from 'rss-parser'
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Request timeout')), ms)),
+  ])
+}
+
 const parser = new Parser()
 
 export interface NewsItem {
@@ -25,7 +41,7 @@ const RSS_FEEDS = [
 
 async function fetchRSSFeed(feedUrl: string, sourceName: string): Promise<NewsItem[]> {
   try {
-    const feed = await parser.parseURL(feedUrl)
+    const feed = await withTimeout(parser.parseURL(feedUrl), 10000)
     return (feed.items || []).slice(0, 5).map((item) => ({
       title: item.title || '',
       link: item.link || '',
@@ -50,6 +66,7 @@ export async function fetchAllNews(): Promise<NewsItem[]> {
 }
 
 export function filterNewsByTopics(news: NewsItem[], topics: string): NewsItem[] {
+  if (!news) return []
   if (!topics) return news.slice(0, 15)
   const keywords = topics.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean)
   if (keywords.length === 0) return news.slice(0, 15)
@@ -60,10 +77,11 @@ export function filterNewsByTopics(news: NewsItem[], topics: string): NewsItem[]
         (item.description || '').toLowerCase().includes(kw)
     )
   )
-  return filtered.length > 0 ? filtered.slice(0, 15) : news.slice(0, 15)
+  return filtered.length > 0 ? filtered.slice(0, 15) : []
 }
 
 export function formatNewsForAI(newsItems: NewsItem[]): string {
+  if (!newsItems) return ''
   return newsItems
     .map(
       (item, i) =>
@@ -73,6 +91,7 @@ export function formatNewsForAI(newsItems: NewsItem[]): string {
 }
 
 export function formatNewsHTML(newsItems: NewsItem[]): string {
+  if (!newsItems) return ''
   const items = newsItems.slice(0, 15)
   let html = ''
   let currentSource = ''
@@ -80,12 +99,13 @@ export function formatNewsHTML(newsItems: NewsItem[]): string {
     if (item.source !== currentSource) {
       if (currentSource) html += '</div>'
       currentSource = item.source
-      html += `<h2 style="color:#007bff;border-left:4px solid #007bff;padding-left:10px;margin:20px 0 10px">${currentSource}</h2><div>`
+      html += `<h2 style="color:#007bff;border-left:4px solid #007bff;padding-left:10px;margin:20px 0 10px">${escapeHtml(currentSource)}</h2><div>`
     }
+    const safeLink = /^https?:\/\//i.test(item.link) ? escapeHtml(item.link) : '#'
     html += `
       <div style="margin:10px 0;padding:12px;background:#f8f9fa;border-radius:6px">
-        <a href="${item.link}" style="color:#007bff;text-decoration:none;font-weight:bold">${item.title}</a>
-        ${item.description ? `<p style="color:#666;margin:6px 0 0;line-height:1.5">${item.description.substring(0, 200)}</p>` : ''}
+        <a href="${safeLink}" style="color:#007bff;text-decoration:none;font-weight:bold">${escapeHtml(item.title)}</a>
+        ${item.description ? `<p style="color:#666;margin:6px 0 0;line-height:1.5">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
         ${item.pubDate ? `<span style="color:#999;font-size:12px">${new Date(item.pubDate).toLocaleString('zh-CN')}</span>` : ''}
       </div>`
   }
