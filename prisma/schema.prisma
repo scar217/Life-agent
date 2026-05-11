@@ -34,6 +34,10 @@ model User {
   accounts      Account[]
   /// 用户会话（NextAuth）
   sessions      Session[]
+  /// 用户自选股关注列表
+  watchlist     StockWatchlist[]
+  /// 每日简报配置（一对一）
+  briefingConfig BriefingConfig?
   
   @@index([email])
 }
@@ -208,4 +212,54 @@ model Message {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+/// 每日简报配置表（用户每日定时推送设置）
+model BriefingConfig {
+  id         String    @id @default(cuid())
+  /// 所属用户 ID
+  userId     String
+  /// 所属用户（级联删除）
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 接收邮箱
+  email      String
+  /// 推送小时（0-23，默认 8 点）
+  pushHour   Int       @default(8)
+  /// 城市（用于天气简报）
+  city       String?
+  /// 新闻主题偏好
+  newsTopics String?
+  /// 是否启用
+  isEnabled  Boolean   @default(true)
+  /// 上次推送时间
+  lastSentAt DateTime?
+  /// 创建时间
+  createdAt  DateTime  @default(now())
+  /// 更新时间
+  updatedAt  DateTime  @updatedAt
+
+  /// 每个用户仅一条配置
+  @@unique([userId])
+  @@index([pushHour, isEnabled])
+}
+
+/// 自选股关注表（用户→股票代码映射）
+model StockWatchlist {
+  /// 主键
+  id        String   @id @default(cuid())
+  /// 所属用户 ID
+  userId    String
+  /// 所属用户（级联删除）
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 股票代码（东方财富格式：sh600519 / sz000858 / hk00700）
+  symbol    String
+  /// 股票名称（冗余存储）
+  name      String
+  /// 所属市场（SH / SZ / HK）
+  market    String
+  /// 添加时间
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, symbol])
+  @@index([userId])
 }
