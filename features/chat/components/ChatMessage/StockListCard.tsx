@@ -1,6 +1,6 @@
 import { getColorScheme, formatPrice, formatChangePct } from './helpers/stock-formatter'
 
-interface StockListItem {
+export interface StockListItem {
   symbol: string
   name: string
   price: number | null
@@ -10,7 +10,7 @@ interface StockListItem {
   code?: string
 }
 
-interface StockListCardProps {
+export interface StockListCardProps {
   title: string
   items: StockListItem[]
 }

@@ -19,6 +19,10 @@ import { TextFileIcon } from '@/components/icons/TextFileIcon'
 import { cn } from '@/lib/utils'
 import type { Message, ToolInvocation, ToolResult, SearchSource } from '@/features/chat/types/chat'
 import type { MessagePhase } from '@/features/chat/types/message-state'
+import { StockQuoteCard } from './StockQuoteCard'
+import { StockListCard } from './StockListCard'
+import type { StockQuoteItem } from './StockQuoteCard'
+import type { StockListItem } from './StockListCard'
 
 /**
  * 搜索状态组件 - 简洁风格，类似 Perplexity
@@ -164,6 +168,46 @@ function ToolInvocationItem({
     return null
   }
 
+  // 股票查询工具
+  if (invocation.name === 'get_stock_info') {
+    if (invocation.state === 'running' || invocation.state === 'pending') {
+      return (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <span>查询股市数据...</span>
+        </div>
+      )
+    }
+
+    if (invocation.state === 'failed') {
+      return (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+          <XCircle className="h-3.5 w-3.5" />
+          <span>查询失败</span>
+        </div>
+      )
+    }
+
+    if (invocation.state === 'completed' && invocation.result) {
+      const result = invocation.result
+      const action = result.action as string
+
+      if (action === 'quote' || action === 'watchlist') {
+        return <StockQuoteCard items={(result.items as StockQuoteItem[]) || []} />
+      }
+
+      if (action === 'hot_sectors') {
+        return <StockListCard title="热门板块" items={(result.sectors as StockListItem[]) || []} />
+      }
+
+      if (action === 'gainers') {
+        return <StockListCard title="涨幅榜" items={(result.gainers as StockListItem[]) || []} />
+      }
+    }
+
+    return null
+  }
+
   // 搜索工具
   if (invocation.name === 'web_search') {
     return <WebSearchStatus invocation={invocation} />
@@ -182,6 +226,23 @@ function ToolResultItem({ result }: { result: ToolResult }) {
   // 图片生成结果不在这里渲染，会在 content 的 markdown 中显示
   if (result.name === 'generate_image') {
     return null
+  }
+
+  // 股票查询结果
+  if (result.name === 'get_stock_info' && result.result.success) {
+    const action = result.result.action as string
+
+    if (action === 'quote' || action === 'watchlist') {
+      return <StockQuoteCard items={(result.result.items as StockQuoteItem[]) || []} />
+    }
+
+    if (action === 'hot_sectors') {
+      return <StockListCard title="热门板块" items={(result.result.sectors as StockListItem[]) || []} />
+    }
+
+    if (action === 'gainers') {
+      return <StockListCard title="涨幅榜" items={(result.result.gainers as StockListItem[]) || []} />
+    }
   }
 
   // 搜索结果 - 简洁的来源标签

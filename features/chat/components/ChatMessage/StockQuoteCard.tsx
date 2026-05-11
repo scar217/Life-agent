@@ -1,7 +1,7 @@
 import { Loader2, XCircle } from 'lucide-react'
 import { getColorScheme, formatPrice, formatChange, formatChangePct, getChangeArrow, formatVolume, formatTurnover } from './helpers/stock-formatter'
 
-interface StockQuoteItem {
+export interface StockQuoteItem {
   symbol: string
   name: string
   market: string
@@ -17,7 +17,7 @@ interface StockQuoteItem {
   totalValue: number | null
 }
 
-interface StockQuoteCardProps {
+export interface StockQuoteCardProps {
   items: StockQuoteItem[]
   isLoading?: boolean
   error?: string
