@@ -106,7 +106,8 @@ export function createStockTool(): Tool {
             })
         }
       } catch (error) {
-        const msg = error instanceof Error ? error.message : '未知错误'
+        const msg = error instanceof Error ? error.message : '获取股票信息失败，请稍后再试'
+        console.error('[StockTool] Execution failed:', msg)
         return JSON.stringify({ success: false, error: msg, action })
       }
     },

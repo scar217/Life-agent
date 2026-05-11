@@ -74,7 +74,7 @@ export function createSSEStreamWithTools(
 
           // 读取 AI 响应，同时启动工具执行
           const { thinkingContent: roundThinking, answerContent: roundAnswer, toolCalls: roundToolCalls, toolPromises } =
-            await processAIResponseWithParallelTools(currentReader, decoder, writer)
+            await processAIResponseWithParallelTools(currentReader, decoder, writer, userId)
 
           thinkingContent += roundThinking // 收集AI思考内容
           console.log(`[Stream] AI 返回: answer=${roundAnswer.length}字, tools=${roundToolCalls.length}个`)
@@ -150,7 +150,8 @@ export function createSSEStreamWithTools(
 async function processAIResponseWithParallelTools(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   decoder: TextDecoder,
-  writer: SSEWriter
+  writer: SSEWriter,
+  userId: string
 ): Promise<{
   thinkingContent: string
   answerContent: string
@@ -221,7 +222,7 @@ async function processAIResponseWithParallelTools(
                 }
                 writer.sendToolCall(toolCall)
                 console.log(`[Stream] 启动工具: ${chunk.function.name}, args: ${args}`)
-                toolPromises.push(startToolExecution(toolCall, writer))
+                toolPromises.push(startToolExecution(toolCall, writer, userId))
               }
             }
           }
@@ -244,7 +245,7 @@ async function processAIResponseWithParallelTools(
     if (!startedTools.has(tc.id)) {
       writer.sendToolCall(tc)
       console.log(`[Stream] 延迟启动工具: ${tc.function.name}, args: ${tc.function.arguments}`)
-      toolPromises.push(startToolExecution(tc, writer))
+      toolPromises.push(startToolExecution(tc, writer, userId))
     }
   }
 
@@ -256,13 +257,18 @@ async function processAIResponseWithParallelTools(
  */
 async function startToolExecution(
   toolCall: ToolCall,
-  writer: SSEWriter
+  writer: SSEWriter,
+  userId: string
 ): Promise<{ toolCallId: string; name: string; success: boolean; content: string }> {
   const name = toolCall.function.name
   let args: Record<string, unknown> = {}
   try {
     args = JSON.parse(toolCall.function.arguments)
   } catch { /* ignore */ }
+
+  if (name === 'get_stock_info') {
+    args._userId = args._userId || userId
+  }
 
   try {
     if (name === 'generate_image') {
