@@ -119,7 +119,7 @@ export async function generateAndSendBriefing(
     <main>
       ${greeting ? `<p style="font-size:16px;line-height:1.8;color:#444;margin:15px 0">${escapeHtml(greeting)}</p>` : ''}
       ${weatherHTML}
-      <h2 style="color:#333;margin:25px 0 15px">&#x1F4B0; 精选新闻</h2>
+      <div style="display:flex;align-items:center;border-bottom:1px solid #f0f2f5;padding-bottom:15px;margin:25px 0 15px"><div style="width:6px;height:24px;background-color:#3b82f6;border-radius:4px;margin-right:12px"></div><h2 style="font-size:24px;font-weight:bold;color:#3b82f6;margin:0;letter-spacing:1px">精选新闻</h2></div>
       ${newsHTML || emptyNewsHTML}
     </main>
     <footer>

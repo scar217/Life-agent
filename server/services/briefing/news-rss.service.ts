@@ -92,14 +92,18 @@ export function formatNewsHTML(newsItems: NewsItem[]): string {
   if (!newsItems) return ''
   const items = newsItems.slice(0, 15)
   let html = ''
-  for (const item of items) {
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
     const safeLink = /^https?:\/\//i.test(item.link) ? escapeHtml(item.link) : '#'
     const ariaLabel = `阅读 ${item.source} 新闻: ${item.title}`
+    const isLast = i === items.length - 1
     html += `
-      <div style="margin:12px 0;padding:14px;background:#f8f9fa;border-radius:8px;border-left:3px solid #667eea">
-        <span style="display:inline-block;background:#667eea;color:#fff;font-size:12px;padding:2px 8px;border-radius:4px;margin-right:8px;vertical-align:middle">${escapeHtml(item.source)}</span>
-        <a href="${safeLink}" aria-label="${escapeHtml(ariaLabel)}" style="color:#333;text-decoration:none;font-weight:bold;font-size:15px;vertical-align:middle">${escapeHtml(item.title)}</a>
-        ${item.description ? `<p style="color:#555;margin:8px 0 0;line-height:1.6;font-size:14px">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
+      <div style="padding:24px 0;border-bottom:${isLast ? 'none' : '1px dashed #e5e7eb'}">
+        <div style="display:flex;align-items:center;margin-bottom:12px;gap:12px">
+          <span style="background-color:#94a3b8;color:#fff;font-size:13px;padding:4px 14px;border-radius:20px;white-space:nowrap">${escapeHtml(item.source)}</span>
+          <a href="${safeLink}" aria-label="${escapeHtml(ariaLabel)}" style="font-size:18px;color:#1f2937;font-weight:500;text-decoration:none">${escapeHtml(item.title)}</a>
+        </div>
+        ${item.description ? `<p style="font-size:15px;color:#6b7280;line-height:1.7;margin:0">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
       </div>`
   }
   return html
