@@ -92,7 +92,7 @@ export async function generateAndSendBriefing(
   const [newsItems, weatherResult] = await Promise.all([
     fetchAllNews(),
     config.city
-      ? createWeatherTool(process.env.AMAP_API_KEY || '').execute({
+      ? createWeatherTool(process.env.WEATHER_API_KEY || '').execute({
           location: config.city,
         })
       : Promise.resolve(null),
