@@ -85,7 +85,7 @@ export function formatNewsForAI(newsItems: NewsItem[]): string {
   return newsItems
     .map(
       (item, i) =>
-        `${i + 1}. [${item.source}] ${item.title}\n   ${(item.description || '').substring(0, 150)}`
+        `${i + 1}. [${item.source}] ${item.title}\n   链接: ${item.link}\n   ${(item.description || '').substring(0, 150)}`
     )
     .join('\n')
 }
