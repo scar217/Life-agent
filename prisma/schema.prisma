@@ -34,7 +34,9 @@ model User {
   accounts      Account[]
   /// 用户会话（NextAuth）
   sessions      Session[]
-  
+  /// 每日简报配置（一对一）
+  briefingConfig BriefingConfig?
+
   @@index([email])
 }
 
@@ -208,4 +210,33 @@ model Message {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+/// 每日简报配置表（用户每日定时推送设置）
+model BriefingConfig {
+  id         String    @id @default(cuid())
+  /// 所属用户 ID
+  userId     String
+  /// 所属用户（级联删除）
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 接收邮箱
+  email      String
+  /// 推送小时（0-23，默认 8 点）
+  pushHour   Int       @default(8)
+  /// 城市（用于天气简报）
+  city       String?
+  /// 新闻主题偏好
+  newsTopics String?
+  /// 是否启用
+  isEnabled  Boolean   @default(true)
+  /// 上次推送时间
+  lastSentAt DateTime?
+  /// 创建时间
+  createdAt  DateTime  @default(now())
+  /// 更新时间
+  updatedAt  DateTime  @updatedAt
+
+  /// 每个用户仅一条配置
+  @@unique([userId])
+  @@index([pushHour, isEnabled])
 }
