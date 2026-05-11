@@ -99,14 +99,16 @@ function WebSearchStatus({ invocation }: { invocation: ToolInvocation }) {
  * 渲染单个工具调用
  * 图片生成完成后会直接插入到 content 流中，这里只显示 loading 状态
  */
-function ToolInvocationItem({ 
-  invocation, 
+function ToolInvocationItem({
+  invocation,
   _messageId,
-  onCancel 
-}: { 
+  onCancel,
+  isStreaming,
+}: {
   invocation: ToolInvocation
   _messageId?: string
   onCancel?: (toolCallId: string) => void
+  isStreaming?: boolean
 }) {
   // 图片生成 - 显示进度条、取消按钮
   if (invocation.name === 'generate_image') {
@@ -189,6 +191,9 @@ function ToolInvocationItem({
     }
 
     if (invocation.state === 'completed' && invocation.result) {
+      // 流式传输期间不渲染卡片，等待思考+回答完成后展示
+      if (isStreaming) return null
+
       const result = invocation.result
       const action = result.action as string
 
@@ -439,11 +444,12 @@ export function ChatMessageUI({
 
           {/* 工具调用状态（运行时，支持多个并行） */}
           {message.toolInvocations?.map((invocation) => (
-            <ToolInvocationItem 
-              key={invocation.toolCallId} 
+            <ToolInvocationItem
+              key={invocation.toolCallId}
               invocation={invocation}
               _messageId={messageId}
               onCancel={onCancelTool}
+              isStreaming={isStreaming}
             />
           ))}
 
