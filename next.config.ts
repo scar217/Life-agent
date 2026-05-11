@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   // Docker 部署用 standalone 模式
   output: 'standalone',
 
-  experimental: {
-    instrumentationHook: true,
-  },
+// instrumentation.ts is available by default in Next.js 15.1+
 
   images: {
     remotePatterns: [
