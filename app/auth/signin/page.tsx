@@ -23,7 +23,7 @@ export default function AuthSignInPage() {
 
     // 如果是 OAuth 弹窗（通过 sessionStorage 标记或 window.opener 检测）
     if (isOAuthPopup || window.opener) {
-      setIsClosing(true)
+      setIsClosing(true) // eslint-disable-line react-hooks/set-state-in-effect
       sessionStorage.removeItem('oauth-popup')
 
       // 通知父窗口

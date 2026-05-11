@@ -56,7 +56,7 @@ export async function handleChatRequest(
     model = 'zai-org/GLM-4.6',
     enableThinking = false,
     thinkingBudget = 4096,
-    enableWebSearch = true,
+    _enableWebSearch = true,
     enableImageGeneration: _enableImageGeneration = false,
     userMessageId,
     aiMessageId,
@@ -90,6 +90,10 @@ export async function handleChatRequest(
   const imageAvailable = toolRegistry.has('generate_image')
   if (imageAvailable) {
     enabledTools.push(toolRegistry.get('generate_image')!)
+  }
+
+  if (toolRegistry.has('get_stock_info')) {
+    enabledTools.push(toolRegistry.get('get_stock_info')!)
   }
   const tools = enabledTools.length > 0
     ? enabledTools.map(tool => ({

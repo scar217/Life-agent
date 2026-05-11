@@ -6,17 +6,19 @@
  * 通过 postMessage 通知父窗口，然后自动关闭
  */
 
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
 export default function OAuthSuccessPage() {
   const sent = useRef(false)
 
-  if (!sent.current && typeof window !== 'undefined' && window.opener) {
-    sent.current = true
-    // 登录成功，告诉主（父）窗口
-    window.opener.postMessage({ type: 'oauth-success' }, window.location.origin)
-    window.close()
-  }
+  useEffect(() => {
+    if (!sent.current && typeof window !== 'undefined' && window.opener) {
+      sent.current = true
+      // 登录成功，告诉主（父）窗口
+      window.opener.postMessage({ type: 'oauth-success' }, window.location.origin)
+      window.close()
+    }
+  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

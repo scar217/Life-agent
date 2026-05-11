@@ -8,7 +8,7 @@
  * - 邮箱/密码登录（备选）
  */
 
-import { useEffect, useState, type FormEventHandler } from 'react'
+import { useState, type FormEventHandler } from 'react'
 import { Loader2, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -39,13 +39,6 @@ export function LoginDialog({ open, onOpenChange, onSuccess, initialRegisterMode
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast() // 弹窗提示
-
-  useEffect(() => {
-    if (!open) return
-
-    setShowEmailLogin(initialRegisterMode)
-    setIsRegisterMode(initialRegisterMode)
-  }, [open, initialRegisterMode])
 
   // 用户邮箱注册处理
   const handleRegister: FormEventHandler<HTMLFormElement> = async (e) => {
