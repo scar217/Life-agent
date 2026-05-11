@@ -1,8 +1,16 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.qq.com',
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+})
 
-const FROM_ADDRESS = process.env.BRIEFING_FROM_EMAIL || 'onboarding@resend.dev'
+const FROM_ADDRESS = process.env.BRIEFING_FROM_EMAIL || process.env.SMTP_USER || ''
 
 export async function sendBriefingEmail(
   to: string,
@@ -10,16 +18,13 @@ export async function sendBriefingEmail(
   html: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await resend.emails.send({
+    const info = await transporter.sendMail({
       from: FROM_ADDRESS,
       to,
       subject,
       html,
     })
-    if (error) {
-      console.error('[BriefingEmail] Resend error:', error.message)
-      return { success: false, error: error.message }
-    }
+    console.log('[BriefingEmail] Sent:', info.messageId)
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
