@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   // Docker 部署用 standalone 模式
   output: 'standalone',
 
+  experimental: {
+    instrumentationHook: true,
+  },
+
   images: {
     remotePatterns: [
       {
