@@ -6,6 +6,8 @@ import {
   escapeHtml,
 } from './news-rss.service'
 import { sendBriefingEmail } from './email.service'
+import { prisma } from '@/server/db/client'
+import { fetchStockQuotes, type StockQuoteItem } from '@/server/services/tools/stock-api'
 
 const SILICONFLOW_API_URL = 'https://api.siliconflow.cn/v1/chat/completions'
 
@@ -46,6 +48,56 @@ async function generateGreeting(
   } catch {
     return ''
   }
+}
+
+function formatStocksHTML(quotes: StockQuoteItem[]): string {
+  if (quotes.length === 0) return ''
+
+  const rows = quotes.map((q) => {
+    const name = escapeHtml(q.name || q.symbol)
+    const code = escapeHtml(q.symbol.replace(/^(sh|sz|hk)/, ''))
+    const price = q.price?.toFixed(2) ?? '--'
+
+    const changeVal = q.change ?? 0
+    const changeStr =
+      q.change != null
+        ? `${changeVal > 0 ? '+' : ''}${changeVal.toFixed(2)}`
+        : '--'
+    const changeColor =
+      changeVal > 0 ? '#ef4444' : changeVal < 0 ? '#22c55e' : '#94a3b8'
+
+    const pctVal = q.changePct ?? 0
+    const pctStr =
+      q.changePct != null
+        ? `${pctVal > 0 ? '+' : ''}${pctVal.toFixed(2)}%`
+        : '--'
+    const pctColor =
+      pctVal > 0 ? '#ef4444' : pctVal < 0 ? '#22c55e' : '#94a3b8'
+
+    return `<tr style="border-bottom:1px solid rgba(255,255,255,0.1)">
+      <td style="padding:8px 6px;font-size:14px">${name}</td>
+      <td style="padding:8px 6px;font-size:12px;color:#94a3b8">${code}</td>
+      <td style="padding:8px 6px;font-size:14px;text-align:right">${price}</td>
+      <td style="padding:8px 6px;font-size:13px;text-align:right;color:${changeColor}">${changeStr}</td>
+      <td style="padding:8px 6px;font-size:13px;text-align:right;color:${pctColor}">${pctStr}</td>
+    </tr>`
+  }).join('')
+
+  return `<div style="background-color:#1e293b;background-image:linear-gradient(135deg,#1e293b,#334155);color:#e2e8f0;padding:20px;border-radius:10px;margin:20px 0">
+    <h2 style="margin:0 0 12px">&#x1F4C8; 今日自选股行情</h2>
+    <table style="width:100%;border-collapse:collapse;color:#e2e8f0">
+      <thead>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.2)">
+          <th style="padding:6px;text-align:left;font-size:12px;color:#94a3b8">股票名称</th>
+          <th style="padding:6px;text-align:left;font-size:12px;color:#94a3b8">代码</th>
+          <th style="padding:6px;text-align:right;font-size:12px;color:#94a3b8">最新价</th>
+          <th style="padding:6px;text-align:right;font-size:12px;color:#94a3b8">涨跌额</th>
+          <th style="padding:6px;text-align:right;font-size:12px;color:#94a3b8">涨跌幅</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`
 }
 
 export interface BriefingConfig {
@@ -96,6 +148,22 @@ export async function generateAndSendBriefing(
     }
   }
 
+  // 3.5. 获取用户自选股行情
+  let stocksHTML = ''
+  try {
+    const watchlistItems = await prisma.stockWatchlist.findMany({
+      where: { userId: config.userId },
+      orderBy: { addedAt: 'asc' },
+    })
+    if (watchlistItems.length > 0) {
+      const symbols = watchlistItems.map((w) => w.symbol)
+      const quotes = await fetchStockQuotes(symbols)
+      stocksHTML = formatStocksHTML(quotes)
+    }
+  } catch (err) {
+    console.error('[Briefing] Failed to fetch stock data:', err instanceof Error ? err.message : err)
+  }
+
   // 4. Assemble full HTML email (code controls structure, AI only writes greeting)
   const dateStr = new Date().toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -122,6 +190,7 @@ export async function generateAndSendBriefing(
     <main>
       ${greeting ? `<p style="font-size:16px;line-height:1.8;color:#444;margin:15px 0">${escapeHtml(greeting)}</p>` : ''}
       ${weatherHTML}
+      ${stocksHTML}
       <div style="box-shadow:0 2px 16px rgba(0,0,0,0.08);border-radius:12px;padding:20px 30px;margin:20px 0;background:#fff">
         <div style="display:flex;align-items:center;border-bottom:1px solid #f0f2f5;padding-bottom:15px;margin-bottom:10px"><div style="width:6px;height:24px;background-color:#3b82f6;border-radius:4px;margin-right:12px"></div><h2 style="font-size:24px;font-weight:bold;color:#3b82f6;margin:0;letter-spacing:1px">精选新闻</h2></div>
         ${newsHTML || emptyNewsHTML}
