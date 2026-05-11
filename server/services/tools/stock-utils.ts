@@ -28,7 +28,7 @@ export interface ParsedSymbol {
 
 /**
  * 将各种格式的股票代码统一解析为 ParsedSymbol
- * 支持输入: "600519" "sh600519" "SH600519" "1.600519"
+ * 支持输入: "600519" "sh600519" "SH600519"
  * 自动推断 market: 6 开头 → SH, 0/3 开头 → SZ, 纯数字 5 位 → HK
  */
 export function parseSymbol(input: string): ParsedSymbol | null {
@@ -43,16 +43,19 @@ export function parseSymbol(input: string): ParsedSymbol | null {
   }
 
   // 纯数字: 推断 market
-  const digitsMatch = trimmed.match(/^(\d{5,6})$/)
+  const digitsMatch = trimmed.match(/^(\d{1,6})$/)
   if (digitsMatch) {
     const code = digitsMatch[1]
     let market: string
-    if (code.length === 5) {
-      market = 'hk'
-    } else if (code.startsWith('6')) {
+    // 6 digits starting with 6 or 9 → SH (A股上海)
+    if (code.length === 6 && (code.startsWith('6') || code.startsWith('9'))) {
       market = 'sh'
-    } else {
+    // 6 digits starting with 0 or 3 → SZ (A股深圳)
+    } else if (code.length === 6 && (code.startsWith('0') || code.startsWith('3'))) {
       market = 'sz'
+    // Otherwise → HK (港股: 1-5 digits, or 6 digits not matching A-share)
+    } else {
+      market = 'hk'
     }
     return { symbol: `${market}${code}`, market: MARKET_NAME_MAP[market], marketCode: EASTMONEY_MARKET_MAP[market], code }
   }
@@ -64,6 +67,7 @@ export function parseSymbol(input: string): ParsedSymbol | null {
  * 构建东方财富实时行情 API URL
  */
 export function buildQuoteUrl(symbols: ParsedSymbol[]): string {
+  if (symbols.length === 0) throw new Error('symbols array cannot be empty')
   const secids = symbols.map(s => `${s.marketCode}.${s.code}`).join(',')
   return `https://push2.eastmoney.com/api/qt/stock/get?secid=${secids}&fields=f43,f44,f45,f46,f47,f48,f49,f50,f51,f52,f57,f58,f116,f117,f162,f167,f168,f169,f170`
 }
