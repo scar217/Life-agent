@@ -97,14 +97,22 @@ export async function fetchStockQuotes(rawSymbols: string[]): Promise<StockQuote
   const items: EMQuoteData[] = []
   if (data.data) {
     if (Array.isArray(data.data)) {
-      // 批量返回可能是数组
       items.push(...(data.data as unknown as EMQuoteData[]))
-    } else if ((data.data as { rc?: Record<string, EMQuoteData> }).rc) {
-      // 批量返回可能是 { rc: { "1.600519": {...}, "0.000858": {...} } }
-      items.push(...Object.values((data.data as { rc: Record<string, EMQuoteData> }).rc))
-    } else {
-      // 单只股票
-      items.push(data.data as unknown as EMQuoteData)
+    } else if (typeof data.data === 'object') {
+      const obj = data.data as Record<string, unknown>
+      // RC 包装格式
+      if (obj.rc && typeof obj.rc === 'object') {
+        items.push(...Object.values(obj.rc as Record<string, EMQuoteData>))
+      } else {
+        // 扁平对象或单只股票: 检查第一个 value 是否为股票数据
+        const vals = Object.values(obj)
+        const firstVal = vals[0]
+        if (firstVal && typeof firstVal === 'object' && 'f43' in (firstVal as object)) {
+          items.push(...(vals as EMQuoteData[]))
+        } else {
+          items.push(data.data as unknown as EMQuoteData)
+        }
+      }
     }
   }
 

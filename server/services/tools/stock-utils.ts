@@ -69,7 +69,7 @@ export function parseSymbol(input: string): ParsedSymbol | null {
 export function buildQuoteUrl(symbols: ParsedSymbol[]): string {
   if (symbols.length === 0) throw new Error('symbols array cannot be empty')
   const secids = symbols.map(s => `${s.marketCode}.${s.code}`).join(',')
-  return `https://push2.eastmoney.com/api/qt/stock/get?secid=${secids}&fields=f43,f44,f45,f46,f47,f48,f49,f50,f51,f52,f57,f58,f116,f117,f162,f167,f168,f169,f170`
+  return `https://push2.eastmoney.com/api/qt/stock/get?secids=${secids}&fields=f43,f44,f45,f46,f47,f48,f49,f50,f51,f52,f57,f58,f116,f117,f162,f167,f168,f169,f170`
 }
 
 /**
