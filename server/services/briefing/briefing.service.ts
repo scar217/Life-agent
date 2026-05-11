@@ -4,6 +4,7 @@ import {
   filterNewsByTopics,
   formatNewsForAI,
   formatNewsHTML,
+  escapeHtml,
 } from './news-rss.service'
 import { sendBriefingEmail } from './email.service'
 
@@ -129,8 +130,13 @@ export async function generateAndSendBriefing(
     { role: 'user', content: prompt },
   ])
 
-  // 5. Assemble full HTML email
-  const newsHTML = formatNewsHTML(filteredNews)
+  // 5. Determine content: prefer AI-generated, fall back to formatted news
+  const contentHTML = aiHTML || formatNewsHTML(filteredNews)
+  if (!contentHTML) {
+    return { success: false, error: 'Failed to generate briefing content' }
+  }
+
+  // 6. Assemble full HTML email
   const dateStr = new Date().toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
@@ -139,7 +145,7 @@ export async function generateAndSendBriefing(
   })
 
   const weatherHTML = weatherData
-    ? `<div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:20px;border-radius:10px;margin:20px 0"><h2 style="margin:0 0 10px">&#x1F324; 今日天气</h2><p style="font-size:18px;margin:0">${weatherData}</p></div>`
+    ? `<div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:20px;border-radius:10px;margin:20px 0"><h2 style="margin:0 0 10px">&#x1F324; 今日天气</h2><p style="font-size:18px;margin:0">${escapeHtml(weatherData)}</p></div>`
     : ''
 
   const fullHTML = `
@@ -147,12 +153,12 @@ export async function generateAndSendBriefing(
   <h1 style="color:#333;border-bottom:3px solid #667eea;padding-bottom:10px">&#x1F4F0; 每日简报</h1>
   <p style="color:#666;font-size:14px">${dateStr}</p>
   ${weatherHTML}
-  <div style="margin:20px 0">${aiHTML}</div>
+  <div style="margin:20px 0">${contentHTML}</div>
   <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
   <p style="color:#999;font-size:12px;text-align:center">本简报由 AI Life Agent 自动生成</p>
 </div>`
 
-  // 6. Send
+  // 7. Send
   const subject = `每日简报 — ${dateStr}`
   return sendBriefingEmail(config.email, subject, fullHTML)
 }
