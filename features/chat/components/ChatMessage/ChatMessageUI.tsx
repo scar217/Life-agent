@@ -442,22 +442,6 @@ export function ChatMessageUI({
             </div>
           )}
 
-          {/* 工具调用状态（运行时，支持多个并行） */}
-          {message.toolInvocations?.map((invocation) => (
-            <ToolInvocationItem
-              key={invocation.toolCallId}
-              invocation={invocation}
-              _messageId={messageId}
-              onCancel={onCancelTool}
-              isStreaming={isStreaming}
-            />
-          ))}
-
-          {/* 工具执行结果（持久化后，从数据库加载） */}
-          {!message.toolInvocations?.length && message.toolResults?.map((result) => (
-            <ToolResultItem key={result.toolCallId} result={result} />
-          ))}
-
           {/* Thinking 面板（独立组件，自己订阅状态） */}
           {message.thinking && (
             <ThinkingPanel
@@ -475,6 +459,23 @@ export function ChatMessageUI({
               />
             </div>
           )}
+
+          {/* 工具调用状态（运行时，支持多个并行）
+              放在思考/回答之后渲染，确保卡片在思考完成后才展示 */}
+          {message.toolInvocations?.map((invocation) => (
+            <ToolInvocationItem
+              key={invocation.toolCallId}
+              invocation={invocation}
+              _messageId={messageId}
+              onCancel={onCancelTool}
+              isStreaming={isStreaming}
+            />
+          ))}
+
+          {/* 工具执行结果（持久化后，从数据库加载） */}
+          {!message.toolInvocations?.length && message.toolResults?.map((result) => (
+            <ToolResultItem key={result.toolCallId} result={result} />
+          ))}
 
           {/* 操作按钮 */}
           {isStreaming && onRetry ? (
