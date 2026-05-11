@@ -116,7 +116,7 @@ export async function generateAndSendBriefing(
     <p style="color:#666;font-size:14px">${dateStr}</p>
     ${greeting ? `<p style="font-size:16px;line-height:1.8;color:#444;margin:15px 0">${escapeHtml(greeting)}</p>` : ''}
     ${weatherHTML}
-    <h2 style="color:#333;margin:25px 0 15px">&#x1F4A1; 今日要闻</h2>
+    <h2 style="color:#333;margin:25px 0 15px">&#x1F4B0; 精选新闻</h2>
     ${newsHTML}
     <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
     <p style="color:#999;font-size:12px;text-align:center">本简报由 AI Life Agent 自动生成</p>

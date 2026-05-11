@@ -92,21 +92,14 @@ export function formatNewsHTML(newsItems: NewsItem[]): string {
   if (!newsItems) return ''
   const items = newsItems.slice(0, 15)
   let html = ''
-  let currentSource = ''
   for (const item of items) {
-    if (item.source !== currentSource) {
-      if (currentSource) html += '</div>'
-      currentSource = item.source
-      html += `<h2 style="color:#007bff;border-left:4px solid #007bff;padding-left:10px;margin:20px 0 10px">${escapeHtml(currentSource)}</h2><div>`
-    }
     const safeLink = /^https?:\/\//i.test(item.link) ? escapeHtml(item.link) : '#'
     html += `
-      <div style="margin:10px 0;padding:12px;background:#f8f9fa;border-radius:6px">
-        <a href="${safeLink}" style="color:#007bff;text-decoration:none;font-weight:bold">${escapeHtml(item.title)}</a>
-        ${item.description ? `<p style="color:#666;margin:6px 0 0;line-height:1.5">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
-        ${item.pubDate ? `<span style="color:#999;font-size:12px">${new Date(item.pubDate).toLocaleString('zh-CN')}</span>` : ''}
+      <div style="margin:12px 0;padding:14px;background:#f8f9fa;border-radius:8px;border-left:3px solid #667eea">
+        <span style="display:inline-block;background:#667eea;color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-right:8px;vertical-align:middle">${escapeHtml(item.source)}</span>
+        <a href="${safeLink}" style="color:#333;text-decoration:none;font-weight:bold;font-size:15px;vertical-align:middle">${escapeHtml(item.title)}</a>
+        ${item.description ? `<p style="color:#666;margin:8px 0 0;line-height:1.6;font-size:14px">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
       </div>`
   }
-  if (currentSource) html += '</div>'
   return html
 }
