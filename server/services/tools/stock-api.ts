@@ -92,10 +92,15 @@ export async function fetchStockQuotes(rawSymbols: string[]): Promise<StockQuote
   if (parsed.length === 0) return []
 
   const url = buildQuoteUrl(parsed)
+  console.log('[StockAPI] Quote URL:', url)
   const data = await eastmoneyFetch<{ data?: { rc?: Record<string, EMQuoteData> } | EMQuoteData | EMQuoteData[] }>(url)
+  console.log('[StockAPI] Raw response keys:', Object.keys(data), 'data type:', typeof data.data, 'isArray:', Array.isArray(data.data))
+  console.log('[StockAPI] Raw data.data (first 300 chars):', JSON.stringify(data.data).substring(0, 300))
 
   const items: EMQuoteData[] = []
   if (data.data) {
+    const firstKey = typeof data.data === 'object' && !Array.isArray(data.data) ? Object.keys(data.data)[0] : 'N/A'
+    console.log('[StockAPI] data.data first key:', firstKey)
     if (Array.isArray(data.data)) {
       items.push(...(data.data as unknown as EMQuoteData[]))
     } else if (typeof data.data === 'object') {
@@ -114,6 +119,8 @@ export async function fetchStockQuotes(rawSymbols: string[]): Promise<StockQuote
         }
       }
     }
+  } else {
+    console.log('[StockAPI] data.data is null/undefined, full response:', JSON.stringify(data).substring(0, 300))
   }
 
   return items.map((item, i) => {
