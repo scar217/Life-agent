@@ -32,6 +32,9 @@ export function startBriefingCron(): void {
           continue
         }
 
+        // Update lastSentAt first to prevent duplicate sends
+        await BriefingRepository.updateLastSentAt(config.id)
+
         const result = await generateAndSendBriefing(
           { ...config, user: config.user },
           apiKey
@@ -39,7 +42,6 @@ export function startBriefingCron(): void {
 
         if (result.success) {
           console.log(`[BriefingCron] Sent to ${config.email}`)
-          await BriefingRepository.updateLastSentAt(config.id)
         } else {
           console.error(`[BriefingCron] Failed for ${config.email}: ${result.error}`)
         }

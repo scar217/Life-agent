@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { BriefingRepository } from '@/server/repositories/briefing.repository'
 import { generateAndSendBriefing } from '@/server/services/briefing'
 
+let isProcessing = false
+
 export async function POST(req: Request) {
   // CRON_SECRET authentication
   const authHeader = req.headers.get('authorization')
@@ -9,6 +11,11 @@ export async function POST(req: Request) {
   if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  if (isProcessing) {
+    return NextResponse.json({ accepted: false, reason: 'Already processing' })
+  }
+  isProcessing = true
 
   // UTC+8 current hour
   const now = new Date()
@@ -19,23 +26,30 @@ export async function POST(req: Request) {
 
   // Fire background processing, don't wait
   ;(async () => {
-    for (const config of configs) {
-      console.log(`[Cron] Processing user ${config.userId}, email=${config.email}`)
-      const apiKey = config.user.apiKey || process.env.SILICONFLOW_API_KEY || ''
-      if (!apiKey) {
-        console.error(`[Cron] No API key for user ${config.userId}`)
-        continue
-      }
-      const result = await generateAndSendBriefing(
-        { ...config, user: config.user },
-        apiKey
-      )
-      if (result.success) {
-        console.log(`[Cron] Sent successfully to ${config.email}`)
+    try {
+      for (const config of configs) {
+        console.log(`[Cron] Processing user ${config.userId}, email=${config.email}`)
+        const apiKey = config.user.apiKey || process.env.SILICONFLOW_API_KEY || ''
+        if (!apiKey) {
+          console.error(`[Cron] No API key for user ${config.userId}`)
+          continue
+        }
+
+        // Update lastSentAt first to prevent duplicate sends
         await BriefingRepository.updateLastSentAt(config.id)
-      } else {
-        console.error(`[Cron] Failed for ${config.email}: ${result.error}`)
+
+        const result = await generateAndSendBriefing(
+          { ...config, user: config.user },
+          apiKey
+        )
+        if (result.success) {
+          console.log(`[Cron] Sent successfully to ${config.email}`)
+        } else {
+          console.error(`[Cron] Failed for ${config.email}: ${result.error}`)
+        }
       }
+    } finally {
+      isProcessing = false
     }
   })()
 
