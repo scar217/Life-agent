@@ -35,7 +35,7 @@ export async function POST(req: Request) {
           continue
         }
 
-        // Update lastSentAt first to prevent duplicate sends
+        // Pessimistic lock: mark first, rollback on failure
         await BriefingRepository.updateLastSentAt(config.id)
 
         const result = await generateAndSendBriefing(
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
           console.log(`[Cron] Sent successfully to ${config.email}`)
         } else {
           console.error(`[Cron] Failed for ${config.email}: ${result.error}`)
+          await BriefingRepository.resetLastSentAt(config.id)
         }
       }
     } finally {

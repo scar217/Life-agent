@@ -43,4 +43,11 @@ export const BriefingRepository = {
       data: { lastSentAt: new Date() },
     })
   },
+
+  async resetLastSentAt(id: string) {
+    return prisma.briefingConfig.update({
+      where: { id },
+      data: { lastSentAt: null },
+    })
+  },
 }

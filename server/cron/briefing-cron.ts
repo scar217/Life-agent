@@ -32,7 +32,7 @@ export function startBriefingCron(): void {
           continue
         }
 
-        // Update lastSentAt first to prevent duplicate sends
+        // Pessimistic lock: mark first, rollback on failure
         await BriefingRepository.updateLastSentAt(config.id)
 
         const result = await generateAndSendBriefing(
@@ -44,6 +44,8 @@ export function startBriefingCron(): void {
           console.log(`[BriefingCron] Sent to ${config.email}`)
         } else {
           console.error(`[BriefingCron] Failed for ${config.email}: ${result.error}`)
+          // Rollback: reset lastSentAt so it can retry
+          await BriefingRepository.resetLastSentAt(config.id)
         }
       }
     } finally {
