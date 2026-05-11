@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/lib/hooks/use-toast'
-import { Loader2, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Loader2, Plus, Trash2, ArrowLeft } from 'lucide-react'
 
 interface WatchlistItem {
   id: string
@@ -83,7 +83,12 @@ export default function StockWatchlistPage() {
 
   return (
     <div className="max-w-lg mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">自选股管理</h1>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">自选股管理</h1>
+      </div>
 
       {/* 添加区域 */}
       <div className="space-y-3 rounded-lg border p-4">
