@@ -27,21 +27,21 @@ export interface NewsItem {
 }
 
 const RSS_FEEDS = [
-  { name: 'TechCrunch', url: 'https://techcrunch.com/feed/' },
   { name: '36氪', url: 'https://36kr.com/feed' },
   { name: '少数派', url: 'https://sspai.com/feed' },
-  { name: 'The Verge', url: 'https://www.theverge.com/rss/full.xml' },
   { name: 'IT之家', url: 'https://www.ithome.com/rss/' },
   { name: '爱范儿', url: 'https://www.ifanr.com/feed' },
-  { name: 'Stripe Blog', url: 'https://stripe.com/blog/feed.rss' },
   { name: 'InfoQ 中文', url: 'https://www.infoq.cn/feed' },
-  { name: 'The Pragmatic Engineer', url: 'https://blog.pragmaticengineer.com/rss/' },
-  { name: 'MIT News - AI', url: 'https://news.mit.edu/rss/topic/artificial-intelligence2' },
+  { name: '知乎每日精选', url: 'https://www.zhihu.com/rss' },
+  { name: '掘金', url: 'https://juejin.cn/rss' },
+  { name: 'V2EX', url: 'https://www.v2ex.com/index.xml' },
+  { name: '博客园', url: 'https://www.cnblogs.com/rss' },
+  { name: '阮一峰的网络日志', url: 'https://www.ruanyifeng.com/blog/atom.xml' },
 ]
 
 async function fetchRSSFeed(feedUrl: string, sourceName: string): Promise<NewsItem[]> {
   try {
-    const feed = await withTimeout(parser.parseURL(feedUrl), 5000)
+    const feed = await withTimeout(parser.parseURL(feedUrl), 10000)
     return (feed.items || []).slice(0, 5).map((item) => ({
       title: item.title || '',
       link: item.link || '',
