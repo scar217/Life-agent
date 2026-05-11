@@ -91,37 +91,16 @@ export async function fetchStockQuotes(rawSymbols: string[]): Promise<StockQuote
   }
   if (parsed.length === 0) return []
 
-  const url = buildQuoteUrl(parsed)
-  console.log('[StockAPI] Quote URL:', url)
-  const data = await eastmoneyFetch<{ data?: { rc?: Record<string, EMQuoteData> } | EMQuoteData | EMQuoteData[] }>(url)
-  console.log('[StockAPI] Raw response keys:', Object.keys(data), 'data type:', typeof data.data, 'isArray:', Array.isArray(data.data))
-  console.log('[StockAPI] Raw data.data (first 300 chars):', JSON.stringify(data.data).substring(0, 300))
+  // 东方财富 /get 端点不支持批量查询，逐个请求
+  const results = await Promise.all(
+    parsed.map(async (p) => {
+      const url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${p.marketCode}.${p.code}&fields=f43,f44,f45,f46,f47,f48,f49,f50,f51,f52,f57,f58,f116,f117,f162,f167,f168,f169,f170`
+      const data = await eastmoneyFetch<{ data?: EMQuoteData }>(url)
+      return data.data ?? null
+    })
+  )
 
-  const items: EMQuoteData[] = []
-  if (data.data) {
-    const firstKey = typeof data.data === 'object' && !Array.isArray(data.data) ? Object.keys(data.data)[0] : 'N/A'
-    console.log('[StockAPI] data.data first key:', firstKey)
-    if (Array.isArray(data.data)) {
-      items.push(...(data.data as unknown as EMQuoteData[]))
-    } else if (typeof data.data === 'object') {
-      const obj = data.data as Record<string, unknown>
-      // RC 包装格式
-      if (obj.rc && typeof obj.rc === 'object') {
-        items.push(...Object.values(obj.rc as Record<string, EMQuoteData>))
-      } else {
-        // 扁平对象或单只股票: 检查第一个 value 是否为股票数据
-        const vals = Object.values(obj)
-        const firstVal = vals[0]
-        if (firstVal && typeof firstVal === 'object' && 'f43' in (firstVal as object)) {
-          items.push(...(vals as EMQuoteData[]))
-        } else {
-          items.push(data.data as unknown as EMQuoteData)
-        }
-      }
-    }
-  } else {
-    console.log('[StockAPI] data.data is null/undefined, full response:', JSON.stringify(data).substring(0, 300))
-  }
+  const items: EMQuoteData[] = results.filter((r): r is EMQuoteData => r !== null)
 
   return items.map((item, i) => {
     // Try to infer market from the returned data
