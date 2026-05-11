@@ -41,7 +41,7 @@ const RSS_FEEDS = [
 
 async function fetchRSSFeed(feedUrl: string, sourceName: string): Promise<NewsItem[]> {
   try {
-    const feed = await withTimeout(parser.parseURL(feedUrl), 10000)
+    const feed = await withTimeout(parser.parseURL(feedUrl), 5000)
     return (feed.items || []).slice(0, 5).map((item) => ({
       title: item.title || '',
       link: item.link || '',

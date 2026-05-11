@@ -17,30 +17,28 @@ export async function POST(req: Request) {
   const configs = await BriefingRepository.findUsersForCurrentHour(utc8Hour)
   console.log(`[Cron] UTC+8 hour=${utc8Hour}, found ${configs.length} users`)
 
-  let sent = 0
-  let errors = 0
-
-  for (const config of configs) {
-    console.log(`[Cron] Processing user ${config.userId}, email=${config.email}, city=${config.city}`)
-    const apiKey = config.user.apiKey || process.env.SILICONFLOW_API_KEY || ''
-    if (!apiKey) {
-      console.error(`[Cron] No API key for user ${config.userId}`)
-      errors++
-      continue
+  // Fire background processing, don't wait
+  ;(async () => {
+    for (const config of configs) {
+      console.log(`[Cron] Processing user ${config.userId}, email=${config.email}`)
+      const apiKey = config.user.apiKey || process.env.SILICONFLOW_API_KEY || ''
+      if (!apiKey) {
+        console.error(`[Cron] No API key for user ${config.userId}`)
+        continue
+      }
+      const result = await generateAndSendBriefing(
+        { ...config, user: config.user },
+        apiKey
+      )
+      if (result.success) {
+        console.log(`[Cron] Sent successfully to ${config.email}`)
+        await BriefingRepository.updateLastSentAt(config.id)
+      } else {
+        console.error(`[Cron] Failed for ${config.email}: ${result.error}`)
+      }
     }
-    const result = await generateAndSendBriefing(
-      { ...config, user: config.user },
-      apiKey
-    )
-    if (result.success) {
-      console.log(`[Cron] Sent successfully to ${config.email}`)
-      await BriefingRepository.updateLastSentAt(config.id)
-      sent++
-    } else {
-      console.error(`[Cron] Failed for ${config.email}: ${result.error}`)
-      errors++
-    }
-  }
+  })()
 
-  return NextResponse.json({ sent, errors })
+  // Respond immediately
+  return NextResponse.json({ accepted: true, users: configs.length })
 }
