@@ -94,11 +94,12 @@ export function formatNewsHTML(newsItems: NewsItem[]): string {
   let html = ''
   for (const item of items) {
     const safeLink = /^https?:\/\//i.test(item.link) ? escapeHtml(item.link) : '#'
+    const ariaLabel = `阅读 ${item.source} 新闻: ${item.title}`
     html += `
       <div style="margin:12px 0;padding:14px;background:#f8f9fa;border-radius:8px;border-left:3px solid #667eea">
-        <span style="display:inline-block;background:#667eea;color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-right:8px;vertical-align:middle">${escapeHtml(item.source)}</span>
-        <a href="${safeLink}" style="color:#333;text-decoration:none;font-weight:bold;font-size:15px;vertical-align:middle">${escapeHtml(item.title)}</a>
-        ${item.description ? `<p style="color:#666;margin:8px 0 0;line-height:1.6;font-size:14px">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
+        <span style="display:inline-block;background:#667eea;color:#fff;font-size:12px;padding:2px 8px;border-radius:4px;margin-right:8px;vertical-align:middle">${escapeHtml(item.source)}</span>
+        <a href="${safeLink}" aria-label="${escapeHtml(ariaLabel)}" style="color:#333;text-decoration:none;font-weight:bold;font-size:15px;vertical-align:middle">${escapeHtml(item.title)}</a>
+        ${item.description ? `<p style="color:#555;margin:8px 0 0;line-height:1.6;font-size:14px">${escapeHtml(item.description.substring(0, 200))}</p>` : ''}
       </div>`
   }
   return html

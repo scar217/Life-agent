@@ -108,18 +108,24 @@ export async function generateAndSendBriefing(
   const newsHTML = formatNewsHTML(filteredNews)
 
   const weatherHTML = weatherData
-    ? `<div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:20px;border-radius:10px;margin:20px 0"><h2 style="margin:0 0 10px">&#x1F324; 今日天气</h2><p style="font-size:18px;margin:0">${escapeHtml(weatherData)}</p></div>`
+    ? `<div style="background-color:#667eea;background-image:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:20px;border-radius:10px;margin:20px 0"><h2 style="margin:0 0 10px">&#x1F324; 今日天气</h2><p style="font-size:18px;margin:0">${escapeHtml(weatherData)}</p></div>`
     : ''
 
-  const fullHTML = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff">
-    <h1 style="color:#333;border-bottom:3px solid #667eea;padding-bottom:10px">&#x1F4F0; 每日简报</h1>
-    <p style="color:#666;font-size:14px">${dateStr}</p>
-    ${greeting ? `<p style="font-size:16px;line-height:1.8;color:#444;margin:15px 0">${escapeHtml(greeting)}</p>` : ''}
-    ${weatherHTML}
-    <h2 style="color:#333;margin:25px 0 15px">&#x1F4B0; 精选新闻</h2>
-    ${newsHTML}
-    <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
-    <p style="color:#999;font-size:12px;text-align:center">本简报由 AI Life Agent 自动生成</p>
+  const emptyNewsHTML = '<p style="color:#999;font-size:14px;text-align:center;padding:30px 0">暂无新闻，请稍后查看</p>'
+
+  const fullHTML = `<div lang="zh-CN" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff">
+    <header><h1 style="color:#333;border-bottom:3px solid #667eea;padding-bottom:10px">&#x1F4F0; 每日简报</h1></header>
+    <p style="color:#444;font-size:14px">${dateStr}</p>
+    <main>
+      ${greeting ? `<p style="font-size:16px;line-height:1.8;color:#444;margin:15px 0">${escapeHtml(greeting)}</p>` : ''}
+      ${weatherHTML}
+      <h2 style="color:#333;margin:25px 0 15px">&#x1F4B0; 精选新闻</h2>
+      ${newsHTML || emptyNewsHTML}
+    </main>
+    <footer>
+      <hr style="border:none;border-top:1px solid #eee;margin:30px 0">
+      <p style="color:#666;font-size:12px;text-align:center">本简报由 AI Life Agent 自动生成</p>
+    </footer>
   </div>`
 
   // 5. Send
