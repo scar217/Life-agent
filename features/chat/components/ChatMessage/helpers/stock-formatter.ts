@@ -21,7 +21,7 @@ export const STOCK_COLORS = {
   },
 } as const
 
-export function getColorScheme(change: number | null | undefined): typeof STOCK_COLORS.up {
+export function getColorScheme(change: number | null | undefined): { readonly bg: string; readonly text: string; readonly border: string } {
   if (change == null || change === 0) return STOCK_COLORS.flat
   return change > 0 ? STOCK_COLORS.up : STOCK_COLORS.down
 }

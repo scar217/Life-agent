@@ -98,7 +98,7 @@ export class SSEWriter {
       event.items = parsed.items
       event.sectors = parsed.sectors
       event.gainers = parsed.gainers
-      event.resultCount = parsed.items?.length || parsed.sectors?.length || parsed.gainers?.length || 0
+      event.resultCount = (parsed.items as unknown[])?.length || (parsed.sectors as unknown[])?.length || (parsed.gainers as unknown[])?.length || 0
     }
 
     this._send(event)
