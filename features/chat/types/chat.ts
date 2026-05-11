@@ -272,6 +272,16 @@ export interface SSEData {
   estimatedTime?: number
   /** 是否被取消（tool_result 事件） */
   cancelled?: boolean
+  /** 股票查询 action（get_stock_info tool_call 事件） */
+  action?: string
+  /** 股票 symbol 数组（get_stock_info tool_call 事件） */
+  symbols?: string[]
+  /** 股票行情列表（get_stock_info tool_result 事件） */
+  items?: Array<Record<string, unknown>>
+  /** 热门板块列表（get_stock_info tool_result 事件） */
+  sectors?: Array<Record<string, unknown>>
+  /** 涨幅榜列表（get_stock_info tool_result 事件） */
+  gainers?: Array<Record<string, unknown>>
 }
 
 /**
