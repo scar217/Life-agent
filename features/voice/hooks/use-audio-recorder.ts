@@ -7,40 +7,13 @@
  * 支持录音、停止、取消等操作。
  *
  * @example
- * ```tsx
- * function VoiceInput() {
- *   const { isRecording, audioBlob, startRecording, stopRecording, cancelRecording } = useAudioRecorder()
- *
- *   const handleVoiceInput = async () => {
- *     if (isRecording) {
- *       stopRecording()
- *     } else {
- *       await startRecording()
- *     }
- *   }
- *
- *   useEffect(() => {
- *     if (audioBlob) {
- *       sendToSTT(audioBlob)
- *     }
- *   }, [audioBlob])
- *
- *   return (
- *     <>
- *       <button onClick={handleVoiceInput}>
- *         {isRecording ? '停止录音' : '开始录音'}
- *       </button>
- *       <button onClick={cancelRecording}>取消</button>
- *     </>
- *   )
- * }
- * ```
  *
  * @module hooks/use-audio-recorder
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 
+// 音频录制 Hook，用于录音、停止、取消等操作
 export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
@@ -73,9 +46,10 @@ export function useAudioRecorder() {
       // 如果没有活跃的 stream，请求麦克风权限
       if (!streamRef.current) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        // 获取麦克风引用
         streamRef.current = stream
       }
-
+      // 创建媒体录制器
       const mediaRecorder = new MediaRecorder(streamRef.current, {
         mimeType: 'audio/webm',
       })
@@ -103,7 +77,7 @@ export function useAudioRecorder() {
           setAudioBlob(blob)
         }
       }
-
+      // 每100ms记录一次音频
       mediaRecorder.start(100)
       setIsRecording(true)
     } catch (error) {

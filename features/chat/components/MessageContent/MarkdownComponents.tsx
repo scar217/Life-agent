@@ -15,9 +15,10 @@ export function createMarkdownComponents(
 ): Components {
   return {
     code: ({ className, children }) => {
-      // 提取语言标识
+      // 正则提取语言标识
       const match = /language-(\w+)/.exec(className || '')
-      const language = match?.[1] || ''
+      // 如果 className 是 "language-weather"，这里提取出的就是 "weather"
+      const language = match?.[1] || '' 
       const content = String(children).replace(/\n$/, '')
 
       // 检查是否是媒体块

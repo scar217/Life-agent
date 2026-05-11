@@ -46,12 +46,22 @@ export const CHAT_MODELS: Model[] = [
     supportsThinkingToggle: true,
     maxTokens: 8192,
   },
+  {
+    id: 'Pro/MiniMaxAI/MiniMax-M2.5',
+    name: 'MiniMax-M2.5',
+    description: '目前最强代码生成模型,支持工具调用',
+    category: 'code',
+    isReasoningModel: false,
+    supportsThinkingToggle: true,
+    maxTokens: 8192,
+  }
 ]
 
 /**
  * 获取默认模型
  */
 export function getDefaultModel(): Model {
+  // 如果默认模型不存在，则返回列表第一个模型
   return CHAT_MODELS.find(m => m.default) || CHAT_MODELS[0]
 }
 
@@ -59,6 +69,7 @@ export function getDefaultModel(): Model {
  * 根据 ID 获取模型
  */
 export function getModelById(id: string): Model | undefined {
+  // 返回CHAT_MODELS中某个模型对象信息
   return CHAT_MODELS.find(m => m.id === id)
 }
 

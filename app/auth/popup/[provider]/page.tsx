@@ -14,7 +14,7 @@ import { useRef, useEffect } from 'react'
 export default function OAuthPopupPage() {
   const params = useParams()
   const provider = params.provider as string
-  const triggered = useRef(false)
+  const triggered = useRef(false) // 起到锁的作用，防止重复触发
 
   useEffect(() => {
     // 标记当前窗口是 OAuth 弹窗
@@ -26,9 +26,11 @@ export default function OAuthPopupPage() {
   // 只触发一次
   if (!triggered.current && typeof window !== 'undefined') {
     triggered.current = true
+    // 告诉Auth服务，登录成功后，跳转到 /auth/popup/success 页面
     signIn(provider, { callbackUrl: '/auth/popup/success' })
   }
 
+  // 过渡页面，显示加载中，正在跳转到 {provider} 登录...
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-4">

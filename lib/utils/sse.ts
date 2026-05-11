@@ -28,8 +28,10 @@ export function parseSSELine(line: string): string | null {
  * @returns lines: 完整的行数组, remaining: 剩余的不完整行
  */
 export function splitSSEBuffer(buffer: string): { lines: string[]; remaining: string } {
+  // 按换行符分割，得到一个数组
   const lines = buffer.split('\n')
-  const remaining = lines.pop() || ''
+  // 把lines数组最后一个元素取出来，赋值给remaining，代表剩余的不完整行
+  const remaining = lines.pop() || '' 
   return { lines, remaining }
 }
 

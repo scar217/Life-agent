@@ -1,5 +1,5 @@
 /**
- * NextAuth.js v4 配置
+ * NextAuth.js v4 配置：https://next-auth.js.org/configuration/options
  * 
  * 统一的认证配置文件，包含所有 providers 和 callbacks
  */
@@ -45,6 +45,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
+      // Authjs要求：返回一个对象登录成功，返回null登录失败
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null
@@ -83,10 +84,10 @@ export const authOptions: NextAuthOptions = {
   },
   
   session: {
-    strategy: 'jwt',
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    strategy: 'jwt', // 使用 JWT 来存储会话信息
+    maxAge: 7 * 24 * 60 * 60, // 会话过期时间(s) 7 days
   },
-  
+  // 控制当执行某个操作时会发生什么
   callbacks: {
     async signIn({ user, account }) {
       if (!user.email) return true
@@ -106,7 +107,7 @@ export const authOptions: NextAuthOptions = {
 
       // Credentials 登录
       if (account?.provider === 'credentials') {
-        user.id = existingUser.id
+        user.id = existingUser.id // 把id设置为数据库记录的id
         return true
       }
 
@@ -152,14 +153,29 @@ export const authOptions: NextAuthOptions = {
 
       return false
     },
-    
+
+    /**
+     * 触发条件：
+     *  /api/auth/signin、/api/auth/session 的请求
+     *  getSession()、getServerSession()、useSession() 方法调用
+     * 
+     * @param param0 
+     * @returns 
+     */
     async jwt({ token, user }) {
+      // user仅在用户登录后，首次调用此回调函数时传递
       if (user) {
         token.id = user.id
       }
       return token
     },
     
+    /**
+     * 触发条件：
+     * getSession()，useSession()，/api/auth/session 的请求
+     * @param param0 
+     * @returns 
+     */
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub
@@ -171,4 +187,5 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',
 }
 
+// NextAuth() 的返回值里有一个 handlers 属性
 export default NextAuth(authOptions)

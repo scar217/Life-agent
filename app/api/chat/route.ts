@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   if (!user) {
     return Response.json({ error: 'User not found' }, { status: 404 })
   }
-
+  // 用户没有提供API key，则使用系统默认API key
   const apiKey = user.apiKey || process.env.SILICONFLOW_API_KEY || process.env.OPENAI_API_KEY
   if (!apiKey) {
     return Response.json(

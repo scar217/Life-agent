@@ -125,7 +125,7 @@ export const StorageManager = {
 
   /**
    * 清空所有应用相关的存储数据
-   * 删除所有 sky-chat- 前缀的项（包括用户数据和 UI 偏好）
+   * 删除所有 ai-chat- 前缀的项（包括用户数据和 UI 偏好）
    *
    * 使用场景：
    * - 重置应用

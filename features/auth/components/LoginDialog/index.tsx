@@ -8,7 +8,7 @@
  * - 邮箱/密码登录（备选）
  */
 
-import React, { useState } from 'react'
+import { useEffect, useState, type FormEventHandler } from 'react'
 import { Loader2, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,21 +26,32 @@ interface LoginDialogProps {
   open: boolean
   onOpenChange?: (open: boolean) => void
   onSuccess?: () => void
+  initialRegisterMode?: boolean
 }
 
-export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps) {
+export function LoginDialog({ open, onOpenChange, onSuccess, initialRegisterMode = false }: LoginDialogProps) {
   const [showEmailLogin, setShowEmailLogin] = useState(false)
-  const [isRegisterMode, setIsRegisterMode] = useState(false)
+  const [isRegisterMode, setIsRegisterMode] = useState(initialRegisterMode)
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const { toast } = useToast() // 弹窗提示
 
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (!open) return
+
+    setShowEmailLogin(initialRegisterMode)
+    setIsRegisterMode(initialRegisterMode)
+  }, [open, initialRegisterMode])
+
+  // 用户邮箱注册处理
+  const handleRegister: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
     
+    // 表单校验
     if (!email.trim() || !password.trim() || !name.trim()) {
       toast({
         title: '请填写完整信息',
@@ -50,6 +61,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
       return
     }
 
+    // 确认密码校验
     if (password !== confirmPassword) {
       toast({
         title: '密码不匹配',
@@ -58,7 +70,8 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
       })
       return
     }
-
+    
+    // 密码长度校验
     if (password.length < 6) {
       toast({
         title: '密码太短',
@@ -68,7 +81,10 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
       return
     }
 
+    // 设置加载状态
     setIsLoading(true)
+    
+    // 发送注册请求
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -87,7 +103,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
         description: '正在登录...',
       })
 
-      // 注册成功后自动登录
+      // 注册成功后自动登录 （ NextAuth内置方法 ）
       const result = await signIn('credentials', {
         email,
         password,
@@ -116,7 +132,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
     }
   }
 
-  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailLogin: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
     
     if (!email.trim() || !password.trim()) {
@@ -171,7 +187,7 @@ export function LoginDialog({ open, onOpenChange, onSuccess }: LoginDialogProps)
         onEscapeKeyDown={(e: KeyboardEvent) => onOpenChange ? undefined : e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl">Sky Chat</DialogTitle>
+          <DialogTitle className="text-center text-2xl">AI Chat</DialogTitle>
           <DialogDescription className="text-center">
             请登录以继续使用
           </DialogDescription>

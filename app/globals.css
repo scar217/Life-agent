@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@tailwind base; /* 基础样式 */
+@tailwind components; /* 组件样式 */
+@tailwind utilities; /* 工具样式 */
 
 @layer utilities {
   .text-balance {

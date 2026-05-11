@@ -7,10 +7,15 @@
 import type { Tool } from './types'
 
 const TAVILY_API_URL = 'https://api.tavily.com/search'
-const SEARCH_TIMEOUT = 10000 // 10 秒超时
+const SEARCH_TIMEOUT = 10000 // 10 秒超时，设置定时任务，超时关闭任务
 
 /**
- * Tavily 搜索结果
+ * Tavily 搜索结果 返回示例：
+      "url": "https://www.imdb.com/name/nm2177779/",
+      "title": "Lionel Messi - IMDb",
+      "content": "Lionel Messi is ...",
+      "score": 0.8361405,
+      "raw_content": null
  */
 interface TavilySearchResult {
   title: string
@@ -39,9 +44,10 @@ async function searchTavily(query: string, apiKey: string): Promise<TavilyRespon
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        api_key: apiKey,
+        // api_key: apiKey,
         query,
         search_depth: 'basic',
         include_answer: true,
@@ -115,21 +121,28 @@ export function extractSearchSources(response: TavilyResponse): SearchSource[] {
 
 /**
  * 创建网页搜索工具
+    export interface Tool {
+      name: string
+      description: string
+      parameters: ToolParameterSchema
+      execute: (args: Record<string, unknown>) => Promise<string>
+    }
  */
 export function createWebSearchTool(apiKey: string): Tool {
   return {
     name: 'web_search',
-    description: '搜索互联网获取 2025 年及以后的最新信息。当用户询问实时信息、新闻、最新数据、当前事件时必须使用此工具。',
+    description: '搜索互联网获取 2026 年及以后的最新信息。当用户询问实时信息、新闻、最新数据、当前事件时必须使用此工具。',
     parameters: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: '搜索关键词，建议包含"2025"或具体年份以获取最新结果',
+          description: '搜索关键词，建议包含"2026"或具体年份以获取最新结果',
         },
       },
       required: ['query'],
     },
+    // 实际执行逻辑
     execute: async (args: Record<string, unknown>): Promise<string> => {
       const query = args.query as string
 

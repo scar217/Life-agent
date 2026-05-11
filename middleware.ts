@@ -31,6 +31,7 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next()
 }
 
+// 配置拦截路径
 export const config = {
   matcher: ['/', '/chat/:path*'],
 }

@@ -22,6 +22,7 @@ import { ConversationSearch } from '@/features/conversation/components/Conversat
 import { MainLayout } from '@/components/MainLayout'
 import { AuthGuard } from '@/features/auth/components/AuthGuard'
 
+// 聊天侧边栏组件
 const ChatSidebar = memo(() => (
   <Sidebar>
     <div className="space-y-2">
@@ -41,18 +42,21 @@ ChatSidebar.displayName = 'ChatSidebar'
  * 组件负责调用 loadMessages 加载消息
  */
 function ConversationContent() {
+  // 获取动态路由参数
   const params = useParams()
+  // 获取路由器实例
   const router = useRouter()
   const conversationId = params.conversationId as string
 
   // 当 conversationId 变化时，加载消息
   useEffect(() => {
     if (!conversationId) {
+      // 如果会话ID不存在，重定向到首页
       router.push('/')
       return
     }
 
-    ChatService.loadMessages(conversationId)
+    ChatService.loadMessages(conversationId) // 加载消息
   }, [conversationId, router])
 
   return (

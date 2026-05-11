@@ -116,29 +116,20 @@ export function MessageList() {
   
   // ========== 处理 URL 中的 pending message ==========
   useEffect(() => {
-    console.log('[MessageList] pending check:', { 
-      isLoadingMessages, 
-      conversationId, 
-      pendingMessageSent: pendingMessageSentRef.current,
-      msg: searchParams.get('msg')
-    })
-    
     // 等待加载完成
     if (isLoadingMessages) return
     if (pendingMessageSentRef.current) return
     if (!conversationId) return
-    
+
     const pendingMessage = searchParams.get('msg')
     if (!pendingMessage) return
-    
-    console.log('[MessageList] Sending pending message:', pendingMessage)
     pendingMessageSentRef.current = true
-    
+
     // 清理 URL 参数
     const url = new URL(window.location.href)
     url.searchParams.delete('msg')
     window.history.replaceState({}, '', url.pathname)
-    
+
     // 发送消息
     ChatService.sendMessage(conversationId, pendingMessage, { createUserMessage: true })
   }, [isLoadingMessages, conversationId, searchParams])

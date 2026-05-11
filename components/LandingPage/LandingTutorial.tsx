@@ -4,7 +4,7 @@
  * Landing Tutorial Component - 落地页新手教程（CSR）
  * 
  * Client Component - 交互式新手引导
- * 展示如何使用 Sky Chat 的基本步骤
+ * 展示如何使用 AI Chat 的基本步骤
  * 
  * @module components/LandingPage/LandingTutorial
  */
@@ -21,7 +21,7 @@ interface TutorialStep {
 
 const tutorialSteps: TutorialStep[] = [
   {
-    title: '欢迎使用 Sky Chat',
+    title: '欢迎使用 AI Chat',
     description: '一个简单、优雅、强大的 AI 对话助手。让我们用 30 秒了解如何使用它。',
     illustration: 'welcome',
   },
@@ -32,7 +32,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: '实时查看 AI 思考',
-    description: 'Sky Chat 会展示 AI 的推理过程，让你了解答案是如何产生的。',
+    description: 'AI Chat 会展示 AI 的推理过程，让你了解答案是如何产生的。',
     illustration: 'thinking',
   },
   {
@@ -58,9 +58,12 @@ const tutorialSteps: TutorialStep[] = [
  * 提供步进式引导，帮助新用户快速上手
  */
 export function LandingTutorial() {
+  // 控制新手教程弹窗
   const [isOpen, setIsOpen] = useState(false)
+  // 控制新手教程步骤
   const [currentStep, setCurrentStep] = useState(0)
 
+  // 下一步处理函数
   const handleNext = () => {
     if (currentStep < tutorialSteps.length - 1) {
       setCurrentStep(currentStep + 1)
@@ -70,18 +73,21 @@ export function LandingTutorial() {
     }
   }
 
+  // 上一步处理函数
   const handlePrev = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
     }
   }
 
+  // 跳过处理函数
   const handleSkip = () => {
     setIsOpen(false)
     setCurrentStep(0)
   }
 
   if (!isOpen) {
+    // 如果新手教程弹窗未打开，则显示浮动按钮
     return (
       <div className="fixed bottom-6 right-6 z-50">
         <Button
@@ -100,7 +106,7 @@ export function LandingTutorial() {
 
   const step = tutorialSteps[currentStep]
   const progress = ((currentStep + 1) / tutorialSteps.length) * 100
-
+  // 如果新手教程弹窗已打开，则显示弹窗
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="relative w-full max-w-2xl mx-4 bg-card rounded-lg shadow-2xl border border-border overflow-hidden">

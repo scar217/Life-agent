@@ -67,7 +67,7 @@ export const useUIStore = create<UIState>()(
         set({ themePreference: theme }),
     }),
     {
-      name: 'sky-chat-ui',
+      name: 'ai-chat-ui',
       version: 1,
     }
   )

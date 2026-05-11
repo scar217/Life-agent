@@ -49,14 +49,14 @@ export async function handleChatRequest(
 ): Promise<ChatResponse> {
   // 确保工具初始化完成
   await ensureToolsReady()
-
+  // 解构请求参数
   const {
     content,
     conversationId,
     model = 'zai-org/GLM-4.6',
     enableThinking = false,
     thinkingBudget = 4096,
-    enableWebSearch = false,
+    enableWebSearch = true,
     enableImageGeneration: _enableImageGeneration = false,
     userMessageId,
     aiMessageId,
@@ -74,12 +74,18 @@ export async function handleChatRequest(
   const updatedTitle = await updateConversationTitle(conversation, content)
 
   // 4. 准备工具定义
-  // - web_search: 需要用户手动开启
+  // - web_search: 需要用户手动开启，始终可用（AI 自动判断何时调用）
+  // - get_weather: 查询天气，始终可用（AI 自动判断何时调用）
   // - generate_image: 始终可用（AI 自动判断何时调用）
   const enabledTools = []
-  if (enableWebSearch && toolRegistry.has('web_search')) {
+  if (toolRegistry.has('web_search')) {
     enabledTools.push(toolRegistry.get('web_search')!)
   }
+
+  if (toolRegistry.has('get_weather')) {
+    enabledTools.push(toolRegistry.get('get_weather')!)
+  }
+
   // 生图工具始终可用，让 AI 自己判断何时调用
   const imageAvailable = toolRegistry.has('generate_image')
   if (imageAvailable) {
@@ -107,7 +113,7 @@ export async function handleChatRequest(
   const currentUserMessage = appendAttachments(content, attachments)
   const contextMessages = buildContextMessages(historyMessages, currentUserMessage, imageAvailable)
 
-  // 6. 调用 AI API
+  // 6. 调用 AI API，并获取响应流 reader
   const { reader } = await createChatCompletion(apiKey, {
     model,
     messages: contextMessages as Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
@@ -116,11 +122,12 @@ export async function handleChatRequest(
     tools,
   })
 
-  // 7. 创建 SSE 流
+  // 7. 用于创建 SSE 流 用于发送给前端
   const sessionId = Date.now().toString()
   
-  // 如果有可用工具，使用支持工具调用的流处理器
+  // 如果有可用工具，使用支持工具调用的流处理器，否则使用普通流处理器
   const hasTools = enabledTools.length > 0
+  // 当前修改，只会使用支持工具调用的流处理器，不会使用普通流处理器
   const stream = hasTools
     ? createSSEStreamWithTools(reader, {
         messageId,

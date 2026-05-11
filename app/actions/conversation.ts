@@ -42,8 +42,24 @@ export async function getConversations(): Promise<ActionResult<ConversationData[
     const userId = await getCurrentUserId()
     const conversations = await ConversationRepository.findByUserId(userId)
     // 转换日期为字符串
-    const data = conversations.map((c) => ({
-      ...c,
+    const data = conversations.map((c: {
+      id: string
+      title: string
+      userId: string
+      isShared: boolean
+      shareToken: string | null
+      isPinned: boolean
+      createdAt: Date
+      updatedAt: Date
+      sharedAt: Date | null
+      pinnedAt: Date | null
+    }) => ({
+      id: c.id,
+      title: c.title,
+      userId: c.userId,
+      isShared: c.isShared,
+      shareToken: c.shareToken,
+      isPinned: c.isPinned,
       createdAt: c.createdAt.toISOString(),
       updatedAt: c.updatedAt.toISOString(),
       sharedAt: c.sharedAt?.toISOString() || null,

@@ -21,6 +21,7 @@ export class SSEParser {
    * 解析单行 SSE 数据
    */
   static parseLine(line: string): SSEData | null {
+    // 检查这行数据是不是 data: [DONE]，如果是告诉前端输出完毕
     if (line.startsWith('data: ') && line.slice(6).trim() === '[DONE]') {
       return { type: 'complete' }
     }
@@ -38,6 +39,8 @@ export class SSEParser {
 
   /**
    * 处理 SSE 流，使用回调函数
+   * @param reader 可读流
+   * @param callbacks 回调函数：当有数据时，调用 onData 回调函数；当流结束时，调用 onComplete 回调函数；当有错误时，调用 onError 回调函数 
    */
   static async parseStream(
     reader: ReadableStreamDefaultReader<Uint8Array>,
@@ -50,6 +53,7 @@ export class SSEParser {
       while (true) {
         const { done, value } = await reader.read()
 
+        // 对应后端的 controller.close()
         if (done) {
           if (buffer.trim()) {
             const { lines } = splitSSEBuffer(buffer + '\n')
@@ -61,7 +65,7 @@ export class SSEParser {
           callbacks.onComplete?.()
           return
         }
-
+        // 使用流式解码
         const chunk = decoder.decode(value, { stream: true })
         buffer += chunk
 

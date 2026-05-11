@@ -7,7 +7,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { GeoChecker } from '@/components/GeoChecker'
 
 export const metadata: Metadata = {
-  title: 'Sky Chat',
+  title: 'AI Chat',
   description: 'AI 智能对话助手 - 基于硅基流动的智能聊天应用',
   icons: {
     icon: '/icon.svg',

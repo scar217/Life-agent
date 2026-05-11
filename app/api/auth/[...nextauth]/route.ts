@@ -11,4 +11,5 @@ import { authOptions } from '@/server/auth/auth'
 
 const handler = NextAuth(authOptions)
 
+// 导出Nextjs认识的 GET 和 POST 方法
 export { handler as GET, handler as POST }

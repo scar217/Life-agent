@@ -45,7 +45,6 @@ function startPolling(): void {
   probeTimer = setInterval(async () => {
     const newResult = await probe()
     if (newResult !== probeResult) {
-      console.log(`[NetworkProbe] ${S3_HOST} 状态变化: ${probeResult} -> ${newResult}`)
       probeResult = newResult
     }
   }, PROBE_INTERVAL)
@@ -68,13 +67,9 @@ export async function isSiliconFlowS3Available(): Promise<boolean> {
   }
   
   // 开始探测
-  console.log(`[NetworkProbe] 开始探测 ${S3_HOST}...`)
   probePromise = probe()
   probeResult = await probePromise
   probePromise = null
-  
-  console.log(`[NetworkProbe] ${S3_HOST} ${probeResult ? '可达 ✓' : '不可达 ✗'}`)
-  
   // 启动定时轮询
   startPolling()
   

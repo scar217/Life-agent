@@ -1,7 +1,7 @@
 /**
  * Message Repository
  * 
- * 消息数据访问层
+ * 消息数据持久化层
  */
 
 import { prisma } from '@/server/db/client'

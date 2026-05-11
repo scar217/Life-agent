@@ -42,7 +42,6 @@ export class ToolRegistry implements IToolRegistry {
     }
     
     this.tools.set(tool.name, tool)
-    console.log(`[ToolRegistry] Registered tool: ${tool.name}`)
   }
 
   /**

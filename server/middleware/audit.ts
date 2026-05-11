@@ -1,11 +1,11 @@
 import { AuditLogRepository, type AuditAction } from '@/server/repositories/audit-log.repository'
-import type { Prisma } from '@prisma/client'
+import type { InputJsonValue } from '@prisma/client/runtime/library'
 
 interface AuditParams {
   userId: string
   action: AuditAction
   resourceId?: string
-  metadata?: Prisma.InputJsonValue
+  metadata?: InputJsonValue
   request?: Request
 }
 

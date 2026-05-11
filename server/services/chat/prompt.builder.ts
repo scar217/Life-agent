@@ -10,6 +10,18 @@
 const BASE_PROMPT = `You are a helpful assistant. 你是一个友好的 AI 助手。`
 
 /**
+ * 获取当前日期（Asia/Shanghai）
+ */
+function getCurrentDateInShanghai(): string {
+  return new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+}
+
+/**
  * 工具不可用提示
  */
 const IMAGE_UNAVAILABLE_PROMPT = `
@@ -63,15 +75,19 @@ const MEDIA_FORMAT_PROMPT = `
 
 4. 搜索规则（重要！）：
 - 当需要查询实时信息、新闻、最新数据时，立即调用 web_search 工具
+- 当用户询问天气、气温、气候时，立即调用 get_weather 工具
 - 直接调用工具，不要说"正在搜索"之类的话
 - 禁止假装搜索或编造搜索结果
 - 如果没有 web_search 工具，告知用户"搜索功能暂不可用"
+- 如果没有 get_weather 工具，告知用户"天气查询功能暂不可用"
 
 5. 工具调用原则（最高优先级！）：
 - 用户要求画图/生成图片 → 必须调用 generate_image，禁止用文字描述
 - 用户要求搜索/查询实时信息 → 必须调用 web_search，禁止编造
+- 用户询问天气、气温、气候 → 必须调用 get_weather，禁止编造
+- 天气相关请求严禁调用 generate_image（即使图片工具可用）
 - 需要工具时，立即调用，不要先输出文字
-- 一次请求中可以同时调用多个工具
+- 一次请求中可以同时调用多个工具（但天气类仅允许 get_weather，可选 web_search）
 - 工具调用失败时再用文字解释原因
 
 区分图表和图片（严格遵守）：
@@ -88,7 +104,10 @@ const MEDIA_FORMAT_PROMPT = `
  * @param imageAvailable - 图片生成工具是否可用
  */
 export function buildSystemPrompt(imageAvailable: boolean = true): string {
-  let prompt = BASE_PROMPT + MEDIA_FORMAT_PROMPT
+  const today = getCurrentDateInShanghai()
+  const datePrompt = `\n\n当前日期（Asia/Shanghai）：${today}。回答涉及“今天/昨日/明天/本周”等时间词时，请以该日期为基准。`
+
+  let prompt = BASE_PROMPT + datePrompt + MEDIA_FORMAT_PROMPT
   if (!imageAvailable) {
     prompt += IMAGE_UNAVAILABLE_PROMPT
   }

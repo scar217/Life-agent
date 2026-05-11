@@ -63,6 +63,7 @@ export async function POST(request: Request) {
         name,
         emailVerified: new Date(), // 暂时自动验证邮箱
       },
+      // 选择返回用户信息字段
       select: {
         id: true,
         email: true,

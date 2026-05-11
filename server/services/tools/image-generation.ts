@@ -26,8 +26,6 @@ export async function executeImageGeneration(
     throw new Error('prompt 不能为空')
   }
 
-  console.log('[ImageGen] 开始生成:', prompt.substring(0, 50))
-
   // 阶段1: 调用 API (0-60%)
   onProgress?.(10)
   const result = await generateImage({
@@ -35,15 +33,12 @@ export async function executeImageGeneration(
     negative_prompt: negativePrompt,
     image_size: imageSize,
   })
-  console.log('[ImageGen] API 返回成功')
   onProgress?.(60)
 
   // 阶段2: 下载保存 (60-100%)
   onProgress?.(70)
-  console.log('[ImageGen] 开始下载:', result.url.substring(0, 80))
   try {
     const stored = await downloadAndSave(result.url)
-    console.log('[ImageGen] 保存成功:', stored.localUrl)
     onProgress?.(100)
 
     return {

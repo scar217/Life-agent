@@ -13,6 +13,7 @@ export default function OAuthSuccessPage() {
 
   if (!sent.current && typeof window !== 'undefined' && window.opener) {
     sent.current = true
+    // 登录成功，告诉主（父）窗口
     window.opener.postMessage({ type: 'oauth-success' }, window.location.origin)
     window.close()
   }

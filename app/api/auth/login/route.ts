@@ -10,6 +10,7 @@ import { verifyPassword } from '@/server/auth/password'
 import { signJWT } from '@/server/auth/jwt'
 import { z } from 'zod'
 
+// 运行时数据格式校验
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),

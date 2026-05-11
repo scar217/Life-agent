@@ -1,7 +1,7 @@
 /**
  * User Repository
  * 
- * 用户数据访问层
+ * 用户数据持久化层
  */
 
 import { prisma } from '@/server/db/client'

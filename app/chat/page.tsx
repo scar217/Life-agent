@@ -27,7 +27,7 @@ function ChatRedirect() {
     const createAndRedirect = async () => {
       try {
         const newId = await useConversationStore.getState().createConversation()
-        // 保留 msg 参数
+        // 保留 msg 参数，msg 是用户在 landing 页输入的 message
         const msg = searchParams.get('msg')
         const url = msg ? `/chat/${newId}?msg=${msg}` : `/chat/${newId}`
         router.replace(url)

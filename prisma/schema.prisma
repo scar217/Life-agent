@@ -8,83 +8,139 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// 用户表：系统内用户主体（本地账号 + OAuth 账号归属）
 model User {
+  /// 用户主键
   id            String         @id @default(cuid())
+  /// 用户名（旧账号体系，唯一，可空）
   username      String?        @unique
+  /// 密码哈希（OAuth登录 用户可为空）
   password      String?
+  /// 邮箱（唯一，可空）
   email         String?        @unique
+  /// 邮箱验证时间（null 表示未验证）
   emailVerified DateTime?
+  /// 展示昵称
   name          String?
+  /// 头像 URL
   image         String?
+  /// 用户自定义 API Key
   apiKey        String?
+  /// 注册时间
   createdAt     DateTime       @default(now())
+  /// 用户下的会话列表
   conversations Conversation[]
+  /// 用户绑定的第三方账号
   accounts      Account[]
+  /// 用户会话（NextAuth）
   sessions      Session[]
   
   @@index([email])
 }
 
+/// 第三方账号表（NextAuth Account, 本地用户与外部身份提供商之间的映射表）
 model Account {
+  /// 账号记录主键
   id                String  @id @default(cuid())
+  /// 归属用户 ID
   userId            String
+  /// 账号类型（如 oauth）
   type              String
+  /// 提供商（google/github）
   provider          String
+  /// 提供商侧账号 ID
   providerAccountId String
+  /// 刷新令牌
   refresh_token     String? @db.Text
+  /// 访问令牌
   access_token      String? @db.Text
+  /// access_token 过期时间戳
   expires_at        Int?
+  /// token 类型
   token_type        String?
+  /// 授权 scope
   scope             String?
+  /// id_token
   id_token          String? @db.Text
+  /// 会话状态
   session_state     String?
 
+  /// 关联用户（级联删除）
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  /// 同一 provider 下的 providerAccountId 唯一
   @@unique([provider, providerAccountId])
   @@index([userId])
 }
 
+/// 会话表（NextAuth Session）
 model Session {
+  /// 会话主键
   id           String   @id @default(cuid())
+  /// 会话 token（唯一）
   sessionToken String   @unique
+  /// 归属用户 ID
   userId       String
+  /// 会话过期时间
   expires      DateTime
+  /// 关联用户（级联删除）
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
 }
 
+/// 验证令牌表（NextAuth VerificationToken）
 model VerificationToken {
+  /// 标识符（邮箱等）
   identifier String
+  /// 验证 token（唯一）
   token      String   @unique
+  /// 过期时间
   expires    DateTime
 
   @@unique([identifier, token])
 }
 
+/// 待确认账号关联表（OAuth 账号合并流程）
 model PendingAccountLink {
+  /// 主键
   id                String   @id @default(cuid())
+  /// 待关联邮箱
   email             String
+  /// 待关联 provider
   provider          String
+  /// provider 账号 ID
   providerAccountId String
+  /// 确认链接 token（唯一）
   token             String   @unique
+  /// token 过期时间
   expires           DateTime
+  /// 创建时间
   createdAt         DateTime @default(now())
 
+  /// 同邮箱同 provider 仅一条待关联记录
   @@unique([email, provider])
   @@index([token])
   @@index([expires])
 }
 
+/// 审计日志表（关键操作留痕）
 model AuditLog {
+  /// 日志主键
   id         String   @id @default(cuid())
+  /// 操作用户 ID
   userId     String
+  /// 操作类型
   action     String
+  /// 资源 ID（可空）
   resourceId String?
+  /// 扩展元数据
   metadata   Json?
+  /// 客户端 IP
   ipAddress  String?
+  /// 客户端 UA
   userAgent  String?
+  /// 记录时间
   createdAt  DateTime @default(now())
 
   @@index([userId, createdAt])
@@ -92,20 +148,35 @@ model AuditLog {
   @@index([resourceId])
 }
 
+/// 会话表（聊天会话容器）
 model Conversation {
+  /// 会话主键
   id           String    @id @default(cuid())
+  /// 会话标题
   title        String    @default("新对话")
+  /// 所属用户 ID
   userId       String
+  /// 所属用户（级联删除）
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 会话消息列表
   messages     Message[]
+  /// 创建时间
   createdAt    DateTime  @default(now())
+  /// 更新时间（自动维护）
   updatedAt    DateTime  @updatedAt
+  /// 分享令牌（唯一）
   shareToken   String?   @unique
+  /// 是否已分享
   isShared     Boolean   @default(false)
+  /// 分享时间
   sharedAt     DateTime?
+  /// 被查看次数
   viewCount    Int       @default(0)
+  /// 最近查看时间
   lastViewedAt DateTime?
+  /// 是否置顶
   isPinned     Boolean   @default(false)
+  /// 置顶时间
   pinnedAt     DateTime?
 
   @@index([userId, updatedAt(sort: Desc)])
@@ -113,32 +184,28 @@ model Conversation {
   @@index([userId, isPinned, pinnedAt(sort: Desc)])
 }
 
+/// 消息表（会话中的每条消息）
 model Message {
+  /// 消息主键
   id             String       @id @default(cuid())
+  /// 所属会话 ID
   conversationId String
+  /// 所属会话（级联删除）
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  /// 消息角色（user/assistant/system）
   role           String
+  /// 文本内容
   content        String       @db.Text
+  /// 思考过程文本
   thinking       String?      @db.Text
+  /// 工具调用记录 JSON
   toolCalls      Json?
-  toolResults    Json?        // 工具执行结果 [{ toolCallId, name, result }]
-  attachments    Json?        // 文件附件列表 [{ name, type, size }]
+  /// 工具执行结果 JSON
+  toolResults    Json?
+  /// 附件信息 JSON
+  attachments    Json?
+  /// 创建时间
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
-}
-
-
-// 监控事件表 - 存储 SDK 上报的埋点数据
-model MonitorEvent {
-  id        String   @id @default(cuid())
-  type      String   // 事件类型: sse_start, sse_complete, tool_start 等
-  timestamp DateTime // 事件发生时间（客户端时间戳）
-  data      Json     // 事件数据: { traceId, ttfb, duration, ... }
-  context   Json     // 上下文: { appId, sessionId, traceId, ... }
-  createdAt DateTime @default(now())
-
-  @@index([type])
-  @@index([timestamp])
-  @@index([type, timestamp])
 }

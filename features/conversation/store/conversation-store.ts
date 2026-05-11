@@ -42,6 +42,7 @@ export interface ConversationState {
   reset: () => void
 }
 
+// 初始化状态
 const initialState = {
   conversations: [],
   filteredConversations: [],
@@ -53,6 +54,7 @@ const initialState = {
 export const useConversationStore = create<ConversationState>((set, get) => ({
   ...initialState,
 
+  // 加载会话列表
   loadConversations: async () => {
     set({ conversationsLoading: true })
     try {
@@ -75,9 +77,11 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     }
   },
 
+  // 设置过滤后的会话列表（用于搜索）
   setFilteredConversations: (conversations: ConversationData[]) =>
     set({ filteredConversations: conversations }),
 
+  // 设置搜索词，更新filteredConversations；空查询时恢复全量列表
   setSearchQuery: (query) => {
     set({ searchQuery: query })
 
@@ -93,6 +97,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     set({ filteredConversations: filtered })
   },
 
+  // 添加新会话到列表，并排序
   addConversation: (conversation: ConversationData) => {
     set((state) => {
       const updated = [conversation, ...state.conversations]

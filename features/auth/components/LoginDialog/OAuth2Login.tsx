@@ -21,9 +21,10 @@ interface OAuth2LoginProps {
 }
 
 export function OAuth2Login({ onSuccess }: OAuth2LoginProps) {
-  const { toast } = useToast()
+  const { toast } = useToast() //  Toast 提示状态管理 Hook
 
   const { openPopup, isLoading } = useOAuthPopup({
+    // 传入成功时，处理函数
     onSuccess: () => {
       toast({
         title: '登录成功',
@@ -35,6 +36,7 @@ export function OAuth2Login({ onSuccess }: OAuth2LoginProps) {
         window.location.reload()
       }
     },
+    // 传入失败时，处理函数
     onError: (error) => {
       toast({
         title: '登录失败',

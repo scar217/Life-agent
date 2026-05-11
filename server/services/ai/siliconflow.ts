@@ -7,6 +7,8 @@
 import { getModelById } from '@/features/chat/constants/models'
 
 const SILICONFLOW_API_URL = 'https://api.siliconflow.cn/v1/chat/completions'
+const REQUEST_TIMEOUT_MS = 120000
+const MAX_RETRIES = 2
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -37,7 +39,7 @@ export async function createChatCompletion(
   
   const modelInfo = getModelById(model)
   
-  // 构建请求体
+  // 构建请求体 Record声明requestBody是键值对类型
   const requestBody: Record<string, unknown> = {
     model,
     messages,
@@ -63,24 +65,58 @@ export async function createChatCompletion(
     requestBody.tool_choice = toolChoice || 'auto'
   }
 
-  const response = await fetch(SILICONFLOW_API_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  })
+  let lastError: unknown = null
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`SiliconFlow API error: ${response.status} - ${errorText}`)
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    // 创建一个 AbortController 实例，用于在请求超时后终止请求
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+    try {
+      // 向 SiliconFlow API 发送请求
+      const response = await fetch(SILICONFLOW_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`SiliconFlow API error: ${response.status} - ${errorText}`)
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No stream available')
+      }
+      return { reader }
+    } catch (error) {
+      lastError = error
+
+      const message = error instanceof Error ? error.message : String(error)
+      const isRetryable =
+        message.includes('ECONNRESET') ||
+        message.includes('UND_ERR_BODY_TIMEOUT') ||
+        message.includes('Body Timeout Error') ||
+        message.includes('network') ||
+        message.includes('fetch failed') ||
+        message.includes('aborted')
+
+      if (!isRetryable || attempt === MAX_RETRIES) {
+        break
+      }
+
+      const delayMs = 800 * attempt
+      console.warn(`[SiliconFlow] Request failed (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delayMs}ms: ${message}`)
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    } finally {
+      clearTimeout(timer)
+    }
   }
 
-  const reader = response.body?.getReader()
-  if (!reader) {
-    throw new Error('No stream available')
-  }
-
-  return { reader }
+  throw lastError instanceof Error ? lastError : new Error('SiliconFlow request failed')
 }

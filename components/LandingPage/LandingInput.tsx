@@ -24,9 +24,10 @@ import { LoginDialog } from '@/features/auth/components/LoginDialog'
  */
 export function LandingInput() {
   const router = useRouter()
-  const [message, setMessage] = useState('')
-  const [showLogin, setShowLogin] = useState(false)
-  const pendingMessageRef = useRef('')
+  const [message, setMessage] = useState('') // 保存用户输入的消息
+  const [showLogin, setShowLogin] = useState(false) // 控制登录对话框是否显示
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login') // 控制登录对话框的登录模式
+  const pendingMessageRef = useRef('') // 保存用户输入的消息，登录成功后用
 
   /**
    * 处理发送按钮点击
@@ -38,6 +39,7 @@ export function LandingInput() {
 
     // 保存到 ref，登录成功后用
     pendingMessageRef.current = trimmedMessage
+    setAuthMode('login')
     setShowLogin(true)
   }, [message])
 
@@ -46,9 +48,10 @@ export function LandingInput() {
    */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // 如果按下回车键且没有Shift键，则阻止默认行为并调用发送函数
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        handleSend()
+        handleSend() // 调用发送函数
       }
     },
     [handleSend]
@@ -77,15 +80,43 @@ export function LandingInput() {
         </Button>
       </div>
 
-      {/* 提示文字 */}
-      <p className="text-center text-sm text-muted-foreground mt-6">
-        点击发送后，您需要登录或注册账号
-      </p>
+      {/* 提示文字与快捷入口 */}
+      <div className="mt-6 space-y-2">
+        {/* <p className="text-center text-sm text-muted-foreground">
+          登录或注册账号，才能使用AI聊天
+        </p> */}
+        <p className="text-center text-sm text-muted-foreground">
+          您需要
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMode('login')
+              setShowLogin(true)
+            }}
+            className="mx-1 text-primary hover:underline"
+          >
+            登录
+          </button>
+          或
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMode('register')
+              setShowLogin(true)
+            }}
+            className="mx-1 text-primary hover:underline"
+          >
+            注册
+          </button>
+          后来才能使用AI聊天功能
+        </p>
+      </div>
 
       {/* 登录对话框 */}
-      <LoginDialog 
-        open={showLogin} 
+      <LoginDialog
+        open={showLogin}
         onOpenChange={setShowLogin}
+        initialRegisterMode={authMode === 'register'}
         onSuccess={() => {
           setShowLogin(false)
           // 带上 pending message 跳转

@@ -27,29 +27,43 @@ export interface StreamContextWithTools extends StreamContext {
   thinkingBudget: number
 }
 
+// 设置最大工具调用次数，防止无限循环
 const MAX_TOOL_ROUNDS = 5
 
 /**
  * 创建支持工具调用的 SSE 流（并行执行）
+ * @param reader - AI响应的可读流
+ * @param context - 包含对话上下文的参数对象
+ * @returns 可读流
+ * @throws 错误
  */
 export function createSSEStreamWithTools(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   context: StreamContextWithTools
 ): ReadableStream {
+  // 解构上下文对象
   const { messageId, conversationId, userId, sessionId, apiKey, model, contextMessages, enableThinking, thinkingBudget } = context
+  // 必须把字符串转成 Uint8Array 才能塞进流里
+
+  // 1.创建文本解码器 字节流转换为字符串
   const decoder = new TextDecoder()
+  // 2.创建文本编码器 字符串转换为字节流
   const encoder = new TextEncoder()
 
+  // 服务端创建一个自己的可读流
   return new ReadableStream({
+    // start方法在流创建时立即执行
     async start(controller) {
+      // encoder:字符串转字节流发送给前端
       const writer = new SSEWriter(controller, encoder, sessionId)
 
       try {
-        let thinkingContent = ''
-        let finalAnswerContent = ''
-        const allToolCalls: ToolCall[] = []
-        const allToolResults: Array<{ toolCallId: string; name: string; result: Record<string, unknown> }> = []
+        let thinkingContent = '' // AI思考内容
+        let finalAnswerContent = '' // AI回答内容
+        const allToolCalls: ToolCall[] = [] // 所有工具调用
+        const allToolResults: Array<{ toolCallId: string; name: string; result: Record<string, unknown> }> = [] // 所有工具结果
 
+        // 当前消息设置为历史上下文消息
         let currentMessages = [...contextMessages]
         let currentReader = reader
         let round = 0
@@ -62,10 +76,10 @@ export function createSSEStreamWithTools(
           const { thinkingContent: roundThinking, answerContent: roundAnswer, toolCalls: roundToolCalls, toolPromises } =
             await processAIResponseWithParallelTools(currentReader, decoder, writer)
 
-          thinkingContent += roundThinking
+          thinkingContent += roundThinking // 收集AI思考内容
           console.log(`[Stream] AI 返回: answer=${roundAnswer.length}字, tools=${roundToolCalls.length}个`)
 
-          // 没有工具调用，结束
+          // 没有工具调用，结束（或模型没打算调用工具）
           if (roundToolCalls.length === 0) {
             finalAnswerContent = roundAnswer
             break
@@ -78,7 +92,7 @@ export function createSSEStreamWithTools(
           const toolResults = await Promise.all(toolPromises)
           console.log('[Stream] 工具全部完成')
 
-          // 发送工具结果
+          // 发送工具结果给前端渲染
           for (const result of toolResults) {
             writer.sendToolResult(result)
             allToolResults.push({
@@ -108,10 +122,10 @@ export function createSSEStreamWithTools(
           currentReader = nextReader
         }
 
-        // 处理图片结果
+        // 处理图片结果（如果有图像生成工具调用的话）
         const contentWithImages = processImageResults(finalAnswerContent, allToolCalls, allToolResults)
 
-        // 保存消息
+        // 保存消息到数据库，方便构建上下文信息（历史消息）
         await persistMessage(messageId, conversationId, userId, {
           thinkingContent,
           answerContent: contentWithImages,

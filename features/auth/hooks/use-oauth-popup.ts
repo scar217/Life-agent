@@ -25,6 +25,7 @@ export function useOAuthPopup(options: UseOAuthPopupOptions = {}) {
   const successCalledRef = useRef(false)
   const isPollingRef = useRef(false)
 
+  // 清理函数，用于清理弹窗和轮询
   const cleanup = useCallback(() => {
     if (pollRef.current) {
       clearInterval(pollRef.current)
@@ -38,6 +39,7 @@ export function useOAuthPopup(options: UseOAuthPopupOptions = {}) {
     setIsLoading(null)
   }, [])
 
+  // 处理成功函数，用于处理成功登录
   const handleSuccess = useCallback(() => {
     if (successCalledRef.current) return
     successCalledRef.current = true
@@ -45,6 +47,7 @@ export function useOAuthPopup(options: UseOAuthPopupOptions = {}) {
     onSuccess?.()
   }, [cleanup, onSuccess])
 
+  // 打开弹窗，用于进行 OAuth 登录
   const openPopup = useCallback((provider: 'google' | 'github') => {
     setIsLoading(provider)
     successCalledRef.current = false
@@ -56,12 +59,14 @@ export function useOAuthPopup(options: UseOAuthPopupOptions = {}) {
 
     const url = `/auth/popup/${provider}`
 
+    // 打开弹窗，用于进行 OAuth 登录，并获取弹窗的对象
     popupRef.current = window.open(
       url,
       'oauth-popup',
       `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
     )
 
+    // 如果弹窗没有被打开
     if (!popupRef.current) {
       cleanup()
       onError?.('弹窗被阻止，请允许弹窗')
@@ -69,7 +74,9 @@ export function useOAuthPopup(options: UseOAuthPopupOptions = {}) {
     }
 
     // 方式1: 监听 postMessage（快速响应）
+    // 定义事件处理函数
     messageHandlerRef.current = (event: MessageEvent) => {
+      // 如果不是同源发来的消息（防止跨域攻击）
       if (event.origin !== window.location.origin) return
       if (event.data?.type === 'oauth-success') {
         handleSuccess()
@@ -77,6 +84,7 @@ export function useOAuthPopup(options: UseOAuthPopupOptions = {}) {
         cleanup()
       }
     }
+    // 监听弹窗的事件
     window.addEventListener('message', messageHandlerRef.current)
 
     // 方式2: 轮询检测弹窗关闭 + session 状态

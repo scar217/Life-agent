@@ -22,12 +22,19 @@ export class SSEWriter {
   private _send(data: Record<string, unknown>): void {
     if (this._closed) return
     try {
+      /**
+       * 将数据编码为字节流，并添加到流中
+       *  SSE要求：
+       *    1.每一条消息必须以 data:  开头，
+       *    2.并以两个换行符 \n\n 结尾。
+       *  */ 
       this._controller.enqueue(this._encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
     } catch {
       this._closed = true
     }
   }
-
+  
+  // 前端根据type类型处理渲染
   sendThinking(content: string): void {
     this._send({ type: 'thinking', content, sessionId: this._sessionId })
   }
@@ -38,7 +45,10 @@ export class SSEWriter {
 
   sendToolCall(tc: ToolCall): void {
     let args: Record<string, unknown> = {}
-    try { args = JSON.parse(tc.function.arguments) } catch { /* ignore */ }
+    try { args = JSON.parse(tc.function.arguments) } 
+    catch { 
+      /* ignore */ 
+    }
 
     const event: Record<string, unknown> = {
       type: 'tool_call',
@@ -48,6 +58,7 @@ export class SSEWriter {
     }
 
     if (tc.function.name === 'web_search') event.query = args.query
+    if (tc.function.name === 'get_weather') event.city = args.city
     if (tc.function.name === 'generate_image') event.prompt = args.prompt
 
     this._send(event)
@@ -80,6 +91,10 @@ export class SSEWriter {
     }
 
     this._send(event)
+  }
+
+  sendErrorMessage(message: string): void {
+    this._send({ type: 'error', message, sessionId: this._sessionId })
   }
 
   sendComplete(): void {

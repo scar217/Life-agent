@@ -6,6 +6,7 @@ import { ToolRegistry } from './registry'
 import { createWebSearchTool } from './web-search'
 import { createImageGenerationTool } from './image-generation'
 import { isSiliconFlowS3Available } from '@/server/services/image/network-probe'
+import { createWeatherTool } from './get-weather'
 
 // 创建全局工具注册表
 const toolRegistry = new ToolRegistry()
@@ -17,11 +18,19 @@ let toolsInitPromise: Promise<void> | null = null
  * 初始化所有工具（只执行一次）
  */
 async function initTools(): Promise<void> {
+  
   // 注册 web_search 工具
   if (process.env.TAVILY_API_KEY) {
     toolRegistry.register(createWebSearchTool(process.env.TAVILY_API_KEY))
   } else {
     console.warn('[Tools] TAVILY_API_KEY not configured, web_search disabled')
+  }
+
+  // 注册天气工具
+  if (process.env.WEATHER_API_KEY) {
+    toolRegistry.register(createWeatherTool(process.env.WEATHER_API_KEY))
+  } else {
+    console.warn('[Tools] WEATHER_API_KEY 未配置，天气查询被禁用')
   }
 
   // 注册 generate_image 工具（需要探测网络）

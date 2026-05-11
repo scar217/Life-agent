@@ -24,7 +24,7 @@ export interface MessageContent {
 }
 
 /**
- * 保存消息内容到数据库
+ * 保存消息内容到数据库（方便构建上下文信息（历史消息））
  */
 export async function persistMessage(
   messageId: string,
@@ -63,6 +63,8 @@ export function processImageResults(
   allToolCalls: ToolCall[],
   allToolResults: Array<{ toolCallId: string; name: string; result: Record<string, unknown> }>
 ): string {
+  const hasImageToolCall = allToolCalls.some((tc) => tc.function.name === 'generate_image')
+
   // 收集真实的图片 URL
   const realImageUrls = new Set<string>()
   for (const resultData of allToolResults) {
@@ -100,6 +102,21 @@ export function processImageResults(
 
   // 清理多余的空行
   contentWithImages = contentWithImages.replace(/\n{3,}/g, '\n\n').trim()
+
+  // 若调用过生图工具但没有任何真实图片 URL，清理误导性文案
+  if (hasImageToolCall && realImageUrls.size === 0) {
+    contentWithImages = contentWithImages
+      .replace(/图片已生成完成。?/g, '')
+      .replace(/已生成(一张)?图片。?/g, '')
+      .replace(/生成完成。?/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+
+    const failureTip = '抱歉，图片生成失败，请稍后重试。'
+    contentWithImages = contentWithImages
+      ? `${contentWithImages}\n\n${failureTip}`
+      : failureTip
+  }
 
   // 追加真实的图片
   for (const resultData of allToolResults) {

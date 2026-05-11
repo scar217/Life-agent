@@ -43,12 +43,12 @@ export function formatToolMessage(result: ToolCallResult): ToolMessage {
     }
   }
   
-  // 图片生成结果：只给 AI 简短消息
+  // 图片生成结果：按执行状态给 AI 反馈，避免失败时误报“已生成”
   if (result.name === 'generate_image') {
     try {
       const parsed = JSON.parse(result.content)
-      if (parsed.error) {
-        content = parsed.error
+      if (!result.success) {
+        content = parsed.error || '图片生成失败。'
       } else if (parsed.url) {
         content = '图片已生成完成。'
       }
@@ -71,11 +71,8 @@ export async function executeToolCall(
   parsedCall: ParsedToolCall,
   registry: IToolRegistry
 ): Promise<ToolCallResult> {
-  console.log(`[ToolHandler] Executing tool: ${parsedCall.name}`, parsedCall.arguments)
-  
   try {
     const content = await registry.executeByName(parsedCall.name, parsedCall.arguments)
-    console.log(`[ToolHandler] Tool ${parsedCall.name} completed`)
     return {
       toolCallId: parsedCall.id,
       name: parsedCall.name,
@@ -109,5 +106,6 @@ export async function executeToolCalls(
  * 将工具调用结果转换为消息数组
  */
 export function formatToolMessages(results: ToolCallResult[]): ToolMessage[] {
+  // 等价：results.map(result => formatToolMessage(result))
   return results.map(formatToolMessage)
 }

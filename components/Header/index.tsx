@@ -154,7 +154,7 @@ export function Header() {
       <Dialog open={aboutDialogOpen} onOpenChange={setAboutDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>关于 Sky Chat</DialogTitle>
+            <DialogTitle>关于 AI Chat</DialogTitle>
             <DialogDescription>
               一个基于硅基流动 API 的智能对话应用
             </DialogDescription>
@@ -169,10 +169,10 @@ export function Header() {
             <div className="space-y-2">
               <h4 className="text-sm font-medium">功能特性</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 支持多种 AI 模型</li>
-                <li>• 思考模式（Reasoning）</li>
-                <li>• 语音输入与合成</li>
-                <li>• 会话分享与导出</li>
+                <li>• 支持多种 AI 模型切换</li>
+                <li>• 支持深度思考模式</li>
+                <li>• 支持语音输入与合成</li>
+                <li>• 支持会话分享与导出</li>
                 <li>• OAuth 登录（GitHub/Google）</li>
               </ul>
             </div>

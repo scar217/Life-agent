@@ -22,6 +22,7 @@ export function ExportButton({ conversationId, className }: ExportButtonProps) {
 
   const handleExport = async () => {
     if (isExporting) return
+    // 新建会话也能导出
     if (!conversationId) {
       toast({
         title: '无法导出',

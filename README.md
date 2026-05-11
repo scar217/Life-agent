@@ -9,7 +9,7 @@ AI 聊天应用，支持多模型对话、语音交互、文件上传。
 - **数据库**: PostgreSQL + Prisma ORM
 - **认证**: Auth.js v5 (Google/GitHub/邮箱登录)
 - **状态管理**: Zustand
-- **UI**: Tailwind CSS + shadcn/ui
+- **UI**: Tailwind CSS + shadcn/ui + lucide-react(图标)
 - **AI**: 硅基流动 API (对话/语音/思考模式)
 
 ## 功能

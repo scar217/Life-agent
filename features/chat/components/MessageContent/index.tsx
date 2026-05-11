@@ -16,7 +16,6 @@ import { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
-import rehypeRaw from 'rehype-raw'
 import { createMarkdownComponents } from './MarkdownComponents'
 
 interface MessageContentProps {
@@ -116,7 +115,7 @@ export function MessageContent({
     <div className="prose prose-sm dark:prose-invert max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeHighlight]}
+        rehypePlugins={[rehypeHighlight]}
         components={markdownComponents}
       >
         {processedContent}
