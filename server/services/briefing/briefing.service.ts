@@ -155,10 +155,14 @@ export async function generateAndSendBriefing(
       where: { userId: config.userId },
       orderBy: { addedAt: 'asc' },
     })
+    console.log('[Briefing] Watchlist items for user', config.userId, ':', watchlistItems.length)
     if (watchlistItems.length > 0) {
       const symbols = watchlistItems.map((w) => w.symbol)
+      console.log('[Briefing] Fetching quotes for symbols:', symbols)
       const quotes = await fetchStockQuotes(symbols)
+      console.log('[Briefing] Got quotes:', quotes.length)
       stocksHTML = formatStocksHTML(quotes)
+      console.log('[Briefing] Stocks HTML length:', stocksHTML.length)
     }
   } catch (err) {
     console.error('[Briefing] Failed to fetch stock data:', err instanceof Error ? err.message : err)

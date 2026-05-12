@@ -11,6 +11,7 @@ const transporter = nodemailer.createTransport({
 })
 
 const FROM_ADDRESS = process.env.BRIEFING_FROM_EMAIL || process.env.SMTP_USER || ''
+const FROM_NAME = process.env.BRIEFING_FROM_NAME || 'AI Life Agent'
 
 export async function sendBriefingEmail(
   to: string,
@@ -19,7 +20,7 @@ export async function sendBriefingEmail(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const info = await transporter.sendMail({
-      from: FROM_ADDRESS,
+      from: `"${FROM_NAME}" <${FROM_ADDRESS}>`,
       to,
       subject,
       html,

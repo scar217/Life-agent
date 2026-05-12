@@ -1,7 +1,7 @@
 /**
  * 东方财富 API 封装层
  */
-import { buildQuoteUrl, buildListUrl, parseSymbol, type ParsedSymbol } from './stock-utils'
+import { buildListUrl, parseSymbol, type ParsedSymbol } from './stock-utils'
 
 const FETCH_TIMEOUT = 8000
 
